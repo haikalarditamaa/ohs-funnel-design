@@ -1,5 +1,5 @@
-<!-- OHS · FOOTER CODE (the NanoBlue page)
-     Paste into: page editor → Settings → Tracking Code → Footer Code.
+/* OHS · FOOTER CODE (the NanoBlue page)
+     Load via <script src> in Tracking Code → Footer Code.
      This is the script only. The footer you see on the page is paste/footer.html.
      It wires up:
        1. Plan picker: selected card, button price, checkout link (?plan=…, UTM tags kept)
@@ -8,8 +8,7 @@
        4. FAQ: keyboard support for ClickFunnels' native Accordion (Tab, Enter / Space)
        5. Cards fade up as they scroll in (skipped for "reduce motion" users)
        6. Footer link groups collapse into tap-to-open rows on phones
-     Everything is found by data-ohs attributes or the snippets' own markup. -->
-<script>
+     Everything is found by data-ohs attributes or the snippets' own markup. */
 (function () {
   var d = document;
   function all(sel, ctx) { return Array.prototype.slice.call((ctx || d).querySelectorAll(sel)); }
@@ -166,4 +165,3 @@
 
   ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); });
 })();
-</script>
