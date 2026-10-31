@@ -361,6 +361,10 @@ html.ohs-live { scroll-behavior: smooth }
 /* media-img (Image element): rounded lifestyle photo */
 [data-ohs~="media-img"] img { display: block; width: 100% !important; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--ohs-r-xl) !important }
 
+/* product-img (Image element): the store product's own photo on a sand tile */
+[data-ohs~="product-img"] img { display: block; width: 100% !important; height: auto; aspect-ratio: 1 / 1; object-fit: contain; padding: 32px; box-sizing: border-box; border-radius: var(--ohs-r-xl) !important; background: var(--ohs-sand) }
+@media (max-width: 767px) { [data-ohs~="product-img"] img { padding: 20px; border-radius: var(--ohs-r-lg) !important } }
+
 /* step: sand card for "How it works" (Image + number + title + text) */
 [data-ohs~="step"] { padding: 24px 24px 32px !important; border-radius: var(--ohs-r-xl) !important; background: var(--ohs-sand) !important; transition: opacity .6s var(--ohs-ease), transform .6s var(--ohs-ease) }
 [data-ohs~="step-img"] img { display: block; width: 100% !important; height: auto; aspect-ratio: 7 / 5; object-fit: contain; padding: 12px; box-sizing: border-box; border-radius: var(--ohs-r-lg) !important; background: #fff }
@@ -422,6 +426,78 @@ html.ohs-live { scroll-behavior: smooth }
   [data-ohs~="cta-copy"] { padding: 8px 0 32px !important }
   [data-ohs~="cta-img"] img { max-width: 200px; margin-top: 24px }
   [data-ohs~="faq"] .elAccordionItemBody :is(p,li,span,h1,h2,h3,h4,h5,h6) { font-size: 14px !important; line-height: 20px !important }
+}
+
+/* =====================================================================
+   NATIVE CHECKOUT  (store product page: tag the Checkout element's COLUMN "checkout")
+   ClickFunnels markup (checked on the live store page):
+     Checkout/V2 > CheckoutMultiStep/V2 > .elMultiStepStep ×3 (Select Product, Shipping, Payment)
+     each step: .elCheckoutStepHeader (marker + title) + .elMultiStepBody[data-step-state="active"]
+     fields: .elInputWrapper / .elSelectWrapper (floating labels), card fields in .payment-card-*-mount
+   With the product plan picker, the Footer Code sets data-ohs-co="closed|open" on the column:
+   closed hides the checkout, open shows it with ClickFunnels' Select Product step hidden
+   (the ODS plan cards replace it) and the remaining steps relabelled 1 and 2.
+   ===================================================================== */
+[data-ohs~="checkout"][data-ohs-co="closed"] [data-page-element="Checkout/V2"] { display: none !important }
+[data-ohs~="checkout"][data-ohs-co="open"] .ohs-plan__cta { display: none }
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(1 of .elMultiStepStep),
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(2 of .elMultiStepStep) .elMultiStepGoBack { display: none !important }
+[data-ohs~="checkout"] [data-page-element="Checkout/V2"],
+[data-ohs~="checkout"] [data-page-element="Checkout/V2"] :not(i):not(.fa):not(.fas):not(.fab) { font-family: var(--ohs-font) !important }
+[data-ohs~="checkout"] [data-page-element="CheckoutMultiStep/V2"] { border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-lg) !important; background: #fff !important; box-shadow: none !important; overflow: hidden }
+[data-ohs~="checkout"] .elMultiStepStep { margin: 0 !important; border: 0 !important; border-top: 1px solid var(--ohs-line) !important }
+[data-ohs~="checkout"] .elMultiStepStep:nth-child(1 of .elMultiStepStep),
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(2 of .elMultiStepStep) { border-top: 0 !important }
+/* step header: number in a circle, green when that step is open */
+[data-ohs~="checkout"] .elCheckoutStepHeader { padding: 18px 20px !important; border: 0 !important; background: none !important }
+[data-ohs~="checkout"] .elCheckoutStepHeaderContent { display: flex !important; align-items: center !important; gap: 12px }
+[data-ohs~="checkout"] .elCheckoutStepMarker { flex: none; display: grid !important; place-items: center; width: 28px !important; height: 28px !important; border: 0 !important; border-radius: 50% !important; background: var(--ohs-sand-200) !important }
+[data-ohs~="checkout"] .elCheckoutStepMarkerText { font-size: 14px !important; line-height: 20px !important; font-weight: 700 !important; color: var(--ohs-text) !important }
+[data-ohs~="checkout"][data-ohs-co] .elCheckoutStepMarkerText { font-size: 0 !important; line-height: 0 !important }
+[data-ohs~="checkout"][data-ohs-co] .elCheckoutStepMarkerText::after { font-size: 14px; line-height: 20px; font-weight: 700; color: var(--ohs-text) }
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(2 of .elMultiStepStep) .elCheckoutStepMarkerText::after { content: "1" }
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(3 of .elMultiStepStep) .elCheckoutStepMarkerText::after { content: "2" }
+[data-ohs~="checkout"] .elMultiStepStep:has(> .elMultiStepBody[data-step-state="active"]) .elCheckoutStepMarker { background: var(--ohs-green) !important }
+[data-ohs~="checkout"] .elMultiStepStep:has(> .elMultiStepBody[data-step-state="active"]) .elCheckoutStepMarkerText,
+[data-ohs~="checkout"] .elMultiStepStep:has(> .elMultiStepBody[data-step-state="active"]) .elCheckoutStepMarkerText::after { color: #fff !important }
+[data-ohs~="checkout"] .elCheckoutStepTitle { font-size: 16px !important; line-height: 24px !important; font-weight: 600 !important; color: var(--ohs-ink) !important }
+[data-ohs~="checkout"] .elCheckoutStepSubtitle { font-size: 13px !important; line-height: 18px !important; color: var(--ohs-muted) !important }
+[data-ohs~="checkout"] .elMultiStepBody { padding: 0 20px 20px !important }
+[data-ohs~="checkout"] .elMultiStepGoBack a { color: var(--ohs-green) !important; font-size: 14px !important; font-weight: 600 !important; text-decoration: none !important }
+/* section labels ("SHIPPING INFORMATION") */
+[data-ohs~="checkout"] .elCheckoutFormLabelContainer { display: flex; align-items: center; gap: 12px; margin: 20px 0 12px !important }
+[data-ohs~="checkout"] .elCheckoutFormLabel { font-size: 12px !important; line-height: 16px !important; font-weight: 700 !important; letter-spacing: .12em !important; text-transform: uppercase !important; color: var(--ohs-green) !important; white-space: nowrap }
+[data-ohs~="checkout"] .elCheckoutFormLabelDivider { flex: 1; margin: 0 !important; border: 0 !important; border-top: 1px solid var(--ohs-line) !important }
+/* fields: separate rounded boxes instead of ClickFunnels' joined groups */
+[data-ohs~="checkout"] .elCheckoutFormRow { display: grid !important; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px; margin: 0 0 12px !important }
+[data-ohs~="checkout"] .elCheckoutForm :is(.elInputWrapper, .elSelectWrapper), [data-ohs~="checkout"] .elCheckoutInput {
+  margin: 0 !important; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important; box-shadow: none !important;
+  transition: border-color .2s, box-shadow .2s;
+}
+[data-ohs~="checkout"] .elCheckoutForm :is(.elInputWrapper, .elSelectWrapper):focus-within { border-color: var(--ohs-green) !important; box-shadow: 0 0 0 3px var(--ohs-green-50) !important }
+[data-ohs~="checkout"] .elCheckoutForm :is(.elInput, .elSelect) { min-height: 50px; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: transparent !important; box-shadow: none !important; font-size: 16px !important; color: var(--ohs-ink) !important }
+[data-ohs~="checkout"] .elCheckoutForm .elLabel label { font-size: 12px !important; color: var(--ohs-muted) !important }
+[data-ohs~="checkout"] :is(.payment-card-number-mount, .payment-card-date-mount, .payment-card-cvv-mount) { min-height: 52px; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important }
+[data-ohs~="checkout"] .elCheckboxText { font-size: 14px !important; color: var(--ohs-text) !important }
+/* Next / Submit: ODS primary pill */
+[data-ohs~="checkout"] [data-page-element="Checkout/V2"] .elBTN .elButton {
+  display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important;
+  width: 100% !important; min-height: 52px; padding: 14px 32px !important; border: 0 !important; border-radius: 999px !important;
+  background: var(--ohs-green) !important; color: #fff !important; box-shadow: none !important;
+  font-size: 16px !important; line-height: 24px !important; font-weight: 700 !important; letter-spacing: .03em !important;
+}
+[data-ohs~="checkout"] [data-page-element="Checkout/V2"] .elBTN .elButton:hover { background: var(--ohs-green-700) !important }
+[data-ohs~="checkout"] [data-page-element="Checkout/V2"] .elBTN .elButton:focus-visible { outline: none !important; box-shadow: var(--ohs-ring) !important }
+[data-ohs~="checkout"] [data-page-element="Checkout/V2"] .elBTN .elButton * { color: inherit !important; font: inherit !important }
+/* order summary + "existing subscription" notice */
+[data-ohs~="checkout"] .elOrderSummaryWrapper { margin: 12px 0 !important; padding: 4px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-sand) !important }
+[data-ohs~="checkout"] .elOrderSummaryHeadText { font-weight: 600 !important; color: var(--ohs-ink) !important }
+[data-ohs~="checkout"] .elSubscriptionDuplicateBanner { padding: 14px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-gold-50) !important }
+[data-ohs~="checkout"] .elSubscriptionDuplicateBanner * { font-size: 14px !important; line-height: 20px !important; color: var(--ohs-text) !important }
+[data-ohs~="checkout"] .elSubscriptionDuplicateBanner a { color: var(--ohs-green) !important; font-weight: 600 !important }
+@media (max-width: 767px) {
+  [data-ohs~="checkout"] .elCheckoutStepHeader { padding: 16px !important }
+  [data-ohs~="checkout"] .elMultiStepBody { padding: 0 16px 16px !important }
 }
 
 /* Reveal on scroll (only when the Footer Code adds html.ohs-motion) */
@@ -499,6 +575,8 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
 .ohs-plan__opt.is-selected .ohs-plan__radio { border: 6px solid var(--ohs-green) }
 .ohs-plan__body { flex: 1; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px }
 .ohs-plan__title, .ohs-plan__price { font-size: 16px; line-height: 24px; font-weight: 600; color: var(--ohs-ink) }
+.ohs-plan__loading { font-size: 14px; line-height: 20px; color: var(--ohs-muted) }
+.ohs-plan__was { margin-left: 6px; font-weight: 400; color: var(--ohs-muted); text-decoration: line-through }
 .ohs-plan__detail { grid-column: 1 / -1; font-size: 14px; line-height: 20px; color: var(--ohs-muted) }
 .ohs-plan__cta { margin-top: 8px }
 .ohs-plan__micro { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 4px 0 0; padding: 0; list-style: none; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--ohs-muted) }
