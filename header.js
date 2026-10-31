@@ -1,9 +1,4 @@
-/* OHS · HEADER CODE
-     Load via <script src> in Tracking Code → Header Code.
-     Loads Red Hat Display (the site font) and turns on smooth scrolling for #buy links.
-     The font is added by script on purpose: ClickFunnels strips Google Fonts <link> tags
-     from Header Code. Nothing here hides content, so the page still works if a script fails. */
-  (function (d) {
+(function (d) {
     d.documentElement.classList.add('ohs-live');
     [['preconnect', 'https://fonts.googleapis.com'], ['preconnect', 'https://fonts.gstatic.com'],
      ['stylesheet', 'https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;800&display=swap']
