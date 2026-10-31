@@ -1,14 +1,3 @@
-/* OHS · FOOTER CODE (the NanoBlue page)
-     Load via <script src> in Tracking Code → Footer Code.
-     This is the script only. The footer you see on the page is paste/footer.html.
-     It wires up:
-       1. Plan picker: selected card, button price, checkout link (?plan=…, UTM tags kept)
-       2. Sticky "Add to cart" bar on phones once the buy box scrolls away
-       3. Gallery thumbnails + 1 / 5 counter
-       4. FAQ: keyboard support for ClickFunnels' native Accordion (Tab, Enter / Space)
-       5. Cards fade up as they scroll in (skipped for "reduce motion" users)
-       6. Footer link groups collapse into tap-to-open rows on phones
-     Everything is found by data-ohs attributes or the snippets' own markup. */
 (function () {
   var d = document;
   function all(sel, ctx) { return Array.prototype.slice.call((ctx || d).querySelectorAll(sel)); }
@@ -16,8 +5,11 @@
 
   /* 1 + 2 · Plan picker and sticky bar */
   function checkoutUrl(base, plan) {
-    var keep = new URLSearchParams(location.search);
-    keep.delete('plan');
+    // Pass marketing tags (utm_*, ad click ids) through to checkout; drop everything else (e.g. preview=true)
+    var keep = new URLSearchParams();
+    new URLSearchParams(location.search).forEach(function (v, k) {
+      if (/^utm_/.test(k) || /^(fbclid|gclid|msclkid|ttclid|affiliate_id|aff_sub)$/.test(k)) keep.set(k, v);
+    });
     keep.set('plan', plan);
     return base + (base.indexOf('?') > -1 ? '&' : '?') + keep.toString();
   }
@@ -163,5 +155,108 @@
     if (mq.addEventListener) mq.addEventListener('change', reset);
   }
 
-  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); });
+  /* 7 · Store product page: ODS plan cards drive ClickFunnels' native Checkout.
+         Cards are built from the product's own price data (the JSON ClickFunnels prints next
+         to its product card). Picking one selects the native product + price; Continue opens
+         the checkout at the Shipping step. State lives on the column ([data-ohs~="checkout"]),
+         not on ClickFunnels' checkout nodes, because ClickFunnels re-renders those. */
+  function initNativePlan() {
+    all('[data-ohs-plan-native]').forEach(function (box) {
+      var root = d.querySelector('[data-page-element="Checkout/V2"]');
+      var ms = root && root.querySelector('[data-page-element="CheckoutMultiStep/V2"]');
+      var card = ms && ms.querySelector('[data-page-element="CheckoutProductCard/V2"]');
+      var json = card && card.parentElement.querySelector('script[type="application/json"]');
+      var data;
+      try { data = JSON.parse(json.textContent); } catch (e) { return; }   // leave the native checkout as is
+      var variant = data.variant || (data.product && data.product.default_variant);
+      if (!variant || !variant.prices || !variant.prices.length) return;
+      var prices = variant.prices.slice().sort(function (a, b) { return b.is_recurring - a.is_recurring; });
+      var cur = variant.currency || '$';
+      var col = root.closest('[data-ohs~="checkout"]') || box.parentElement;
+      function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+      function num(s) { return parseFloat(String(s || '').replace(/[^0-9.]/g, '')) || 0; }
+
+      box.textContent = '';   // drop the placeholder line
+      var head = el('div', 'ohs-plan__head');
+      head.appendChild(el('span', 'ohs-plan__label', box.getAttribute('data-label') || 'Choose how you buy'));
+      var sub = prices.filter(function (p) { return p.is_recurring && p.compare_at_amount; })[0];
+      if (sub) {
+        var save = num(sub.compare_at_amount) - num(sub.price);
+        if (save > 0) head.appendChild(el('span', 'ohs-badge ohs-badge--green', 'Save ' + cur + (save % 1 ? save.toFixed(2) : save) + ' ' + (box.getAttribute('data-save-suffix') || '')));
+      }
+      var group = el('div', 'ohs-plan__options');
+      group.setAttribute('role', 'radiogroup');
+      group.setAttribute('aria-label', box.getAttribute('data-label') || 'Choose how you buy');
+      var opts = prices.map(function (p) {
+        var b = el('button', 'ohs-plan__opt');
+        b.type = 'button';
+        b.setAttribute('role', 'radio');
+        var radio = el('span', 'ohs-plan__radio');
+        radio.setAttribute('aria-hidden', 'true');
+        var body = el('span', 'ohs-plan__body');
+        body.appendChild(el('span', 'ohs-plan__title', p.name));
+        var price = el('span', 'ohs-plan__price', p.price);
+        if (p.compare_at_amount) price.appendChild(el('s', 'ohs-plan__was', p.compare_at_amount));
+        body.appendChild(price);
+        var detail = box.getAttribute(p.is_recurring ? 'data-sub-detail' : 'data-once-detail');
+        if (detail) body.appendChild(el('span', 'ohs-plan__detail', detail));
+        b.appendChild(radio);
+        b.appendChild(body);
+        group.appendChild(b);
+        b.ohsPrice = p;
+        return b;
+      });
+      var cta = el('button', 'ohs-btn ohs-btn--block ohs-plan__cta');
+      cta.type = 'button';
+      box.appendChild(head);
+      box.appendChild(group);
+      box.appendChild(cta);
+      col.setAttribute('data-ohs-co', 'closed');
+      if (!d.getElementById('buy')) box.id = 'buy';   // scroll target for every #buy button
+
+      function syncNative(p) {
+        // look both up each time: selecting the card makes ClickFunnels re-render it (new <select>)
+        var c = ms.querySelector('[data-page-element="CheckoutProductCard/V2"]');
+        if (c && !c.classList.contains('elProductSelected')) c.click();
+        var s = ms.querySelector('select[name="variant_price"]');
+        if (s && s.value !== p.id) {
+          s.value = p.id;
+          s.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      var chosen;
+      function choose(b, focus) {
+        chosen = b;
+        opts.forEach(function (o) {
+          var on = o === b;
+          o.setAttribute('aria-checked', on ? 'true' : 'false');
+          o.classList.toggle('is-selected', on);
+          o.tabIndex = on ? 0 : -1;
+        });
+        if (focus) b.focus();
+        cta.textContent = (box.getAttribute('data-cta') || 'Continue to checkout') + ' · ' + b.ohsPrice.price;
+        syncNative(b.ohsPrice);
+      }
+      opts.forEach(function (o, i) {
+        o.addEventListener('click', function () { choose(o); });
+        o.addEventListener('keydown', function (e) {
+          var step = (e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : (e.key === 'ArrowUp' || e.key === 'ArrowLeft') ? -1 : 0;
+          if (!step) return;
+          e.preventDefault();
+          choose(opts[(i + step + opts.length) % opts.length], true);
+        });
+      });
+      cta.addEventListener('click', function () {
+        syncNative(chosen.ohsPrice);
+        col.setAttribute('data-ohs-co', 'open');
+        var first = ms.querySelector('.elMultiStepBody[data-step-state="active"]');
+        var next = first && first.querySelector('a[href="#!next-step"]');
+        if (next && first === ms.querySelector('.elMultiStepBody')) next.click();   // still on Select Product
+        setTimeout(function () { root.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+      });
+      choose(opts[0]);
+    });
+  }
+
+  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); });
 })();
