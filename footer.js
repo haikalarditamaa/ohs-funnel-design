@@ -315,5 +315,39 @@
     new MutationObserver(function () { apply(); }).observe(root, { subtree: true, attributes: true, attributeFilter: ['data-step-state'] });
   }
 
-  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); initCheckoutPlan(); });
+  /* 10 · Sticky header (section tagged hdr): it sticks to the top once the promo bar has scrolled
+          away, slides up out of view while the visitor scrolls down, and slides back in as soon
+          as they scroll up. Its CSS ships here with the behaviour, so every page that loads this
+          script gets both (data-ohs-hdr="stuck" / "stuck hidden" on the section). */
+  var HDR_CSS =
+    '[data-ohs~="hdr"]{position:sticky!important;top:0;z-index:100;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s}' +
+    '[data-ohs~="hdr"][data-ohs-hdr~="stuck"]{box-shadow:0 4px 12px rgba(31,45,74,.08)}' +
+    '[data-ohs~="hdr"][data-ohs-hdr~="hidden"]{transform:translateY(-100%);box-shadow:none}' +
+    '@media (prefers-reduced-motion:reduce){[data-ohs~="hdr"]{transition:none}}';
+  function initStickyHeader() {
+    var h = d.querySelector('[data-ohs~="hdr"]');
+    if (!h || d.getElementById('ohs-hdr-css')) return;
+    var st = d.createElement('style');
+    st.id = 'ohs-hdr-css';
+    st.textContent = HDR_CSS;
+    d.head.appendChild(st);
+    var prev = h.previousElementSibling;                  // the promo bar, if any
+    var last = window.pageYOffset, ticking = false;
+    function set(stuck, hidden) { h.setAttribute('data-ohs-hdr', (stuck ? 'stuck' : '') + (hidden ? ' hidden' : '')); }
+    function update() {
+      ticking = false;
+      var y = Math.max(window.pageYOffset, 0);
+      var start = prev ? prev.getBoundingClientRect().bottom + y : 0;   // where the header starts sticking
+      var dy = y - last;
+      if (y <= start + h.offsetHeight) { set(y > start, false); last = y; return; }   // near the top: always shown
+      if (Math.abs(dy) < 6) return;                                                   // ignore tiny jitters
+      set(true, dy > 0 && !h.contains(d.activeElement));  // keep it while a keyboard user is in it
+      last = y;
+    }
+    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    h.addEventListener('focusin', function () { set(/stuck/.test(h.getAttribute('data-ohs-hdr') || ''), false); });
+    update();
+  }
+
+  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); initCheckoutPlan(); initStickyHeader(); });
 })();

@@ -72,6 +72,13 @@
    inside the field: that was the second, overlapping outline. The wrapper's border is the only one. */
 [data-page-element="Checkout/V2"] :is(.elInputWrapper, .elSelectWrapper) div.inputHolder { border: 0 !important; box-shadow: none !important }
 [data-page-element="Checkout/V2"] .elLabel .borderHolder { border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important }
+/* Once a field has a value (or focus) ClickFunnels nudges the text box down 15% with transform, so the box
+   pokes out under the field: the focus ring and Chrome's blue autofill fill showed offset. Same text spot via padding. */
+[data-page-element="Checkout/V2"] .labelInside:is(.elInputFocused, .hasValue) :is(.elInput, .elSelect) { transform: none !important; padding-top: 21.5px !important; padding-bottom: 6.5px !important }
+/* the field's green outline is the focus sign; no second (page-wide blue) ring on the bare input */
+[data-page-element="Checkout/V2"] :is(input, select, textarea):focus-visible { outline: none !important; box-shadow: none !important }
+/* autofill: keep the field white (Chrome paints it pale blue) */
+[data-page-element="Checkout/V2"] :is(input, select):-webkit-autofill { -webkit-box-shadow: 0 0 0 100px #fff inset !important; box-shadow: 0 0 0 100px #fff inset !important; -webkit-text-fill-color: var(--ohs-ink) !important; background-clip: border-box !important }
 /* card fields: ONE rounded box with thin separators (ClickFunnels drew an outer box plus a box per field).
    The text inside is drawn by the payment provider in its own frames. */
 [data-page-element="Checkout/V2"] .payment-card-fields-container { display: flex !important; align-items: stretch; overflow: hidden; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important; box-shadow: none !important }
@@ -80,6 +87,8 @@
 [data-page-element="Checkout/V2"] :is(.payment-card-number-mount, .payment-card-date-mount, .payment-card-cvv-mount) { min-height: 52px; margin: 0 !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; box-shadow: none !important }
 [data-page-element="Checkout/V2"] .payment-card-number-mount { flex: 1 1 auto }
 [data-page-element="Checkout/V2"] :is(.payment-card-date-mount, .payment-card-cvv-mount) { border-left: 1px solid var(--ohs-line) !important }
+/* the provider's own focus box (dark, square) on the focused part: the outer box turns green instead */
+[data-page-element="Checkout/V2"] .payment-card-fields-container .rebilly-framepay.rebilly-input { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; outline: none !important }
 [data-page-element="Checkout/V2"] .elCheckboxText { font-size: 14px !important; color: var(--ohs-text) !important }
 /* Next / Submit: ODS Button (Figma 5:68 · Primary, Large): 56px pill, 1.5px border, Bold 16/24.
    Default: green, no arrow. Hover: white with green outline, green-700 text, arrow slides in.
@@ -109,6 +118,9 @@
 [data-page-element="Checkout/V2"] .elOrderSummaryRow { color: var(--ohs-text) !important; border-color: var(--ohs-line) !important }
 [data-page-element="Checkout/V2"] .elOrderSummaryHead i, [data-page-element="Checkout/V2"] .elOrderSummaryToggleable { color: var(--ohs-green) !important }
 [data-page-element="Checkout/V2"] .elOrderSummaryHeadText { font-weight: 600 !important; color: var(--ohs-ink) !important }
+[data-page-element="Checkout/V2"] .elOrderSummaryRowRight { display: flex !important; align-items: center; gap: 10px }
+/* "We never share your information" under Next / Submit */
+[data-page-element="Checkout/V2"] .elCheckoutButtonTextDisclaimer { margin: 12px 0 0 !important; font-size: 13px !important; line-height: 18px !important; color: var(--ohs-muted) !important; text-align: center }
 [data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner { padding: 14px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-gold-50) !important }
 [data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner * { font-size: 14px !important; line-height: 20px !important; color: var(--ohs-text) !important }
 [data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner a { color: var(--ohs-green) !important; font-weight: 600 !important }
@@ -133,6 +145,7 @@
 [data-page-element="Checkout/V2"] [data-page-element="CheckoutProductCard/V2"] {
   position: relative; display: flex !important; align-items: flex-start; gap: 12px; flex-wrap: wrap;
   margin: 0 0 12px !important; padding: 16px !important; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important;
+  box-sizing: border-box; width: auto !important; max-width: 100%; /* ClickFunnels' width ran 20px past the column on phones */
 }
 [data-page-element="Checkout/V2"] [data-page-element="CheckoutProductCard/V2"]:has(input[name="product"]:checked),
 [data-page-element="Checkout/V2"] [data-page-element="CheckoutProductCard/V2"].elProductSelected { border: 2px solid var(--ohs-green) !important; padding: 15px !important; background: var(--ohs-green-50) !important }
