@@ -507,6 +507,7 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
 
 /* =====================================================================
    HEADER & FOOTER  (native elements · Figma: Funnel Header & Footer, 60:858)
+   Promo   Section promo → Row wrap → 1 column: Paragraph promo-text
    Header  Section hdr → Row wrap → 1 column:
              Image hdr-logo · Bullet List hdr-trust · Button "btn btn-plain hdr-cta"
    Footer  Section ftr → Row wrap → 1 column:
@@ -529,6 +530,20 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
 :is([data-ohs~="hdr-logo"],[data-ohs~="hdr-trust"],[data-ohs~="hdr-cta"],[data-ohs~="ftr-logo"],[data-ohs~="ftr-line"],[data-ohs~="ftr-legal"]) { margin: 0 !important; padding: 0 !important }
 :is([data-ohs~="hdr-logo"],[data-ohs~="ftr-logo"]) img { display: block; height: auto !important; max-width: none !important; margin: 0 !important }
 
+/* Promo bar: navy strip above the header. Section promo → Row → Column → Paragraph promo-text.
+   Bold words turn gold. Same wrapper / clearfix handling as the header. */
+[data-ohs~="promo"] {
+  width: 100% !important; max-width: none !important; margin: 0 !important; box-sizing: border-box !important;
+  padding: 10px max(16px, calc((100% - 1200px) / 2)) !important; background: var(--ohs-navy) !important;
+}
+[data-ohs~="promo"] :has([data-ohs~="promo-text"]) { display: contents !important }
+:is([data-ohs~="promo"], [data-ohs~="promo"] :has([data-ohs~="promo-text"]))::before,
+:is([data-ohs~="promo"], [data-ohs~="promo"] :has([data-ohs~="promo-text"]))::after { content: none !important; display: none !important }
+[data-ohs~="promo-text"] { width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important }
+[data-ohs~="promo-text"] p { font-size: 14px !important; line-height: 20px !important; font-weight: 600 !important; color: #fff !important; text-align: center !important }
+[data-ohs~="promo-text"] :is(b,strong) { color: var(--ohs-gold) !important; font-weight: 700 !important }
+[data-ohs~="promo-text"] a { color: var(--ohs-gold) !important; text-decoration: underline; text-underline-offset: 2px }
+
 /* Header: white bar, logo · trust items · Buy now */
 [data-ohs~="hdr"] { padding-top: 16px !important; padding-bottom: 16px !important; background: #fff !important; border-bottom: 1px solid var(--ohs-line) !important }
 [data-ohs~="hdr"] {
@@ -539,19 +554,19 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
 [data-ohs~="hdr"] :has([data-ohs~="hdr-logo"]) > *, [data-ohs~="hdr"] > * { flex: 0 0 auto !important; width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important }
 [data-ohs~="hdr-logo"] img { width: 88px !important }
 [data-ohs~="hdr-trust"] ul { display: flex !important; align-items: center; gap: 24px; margin: 0 !important; padding: 0 !important; list-style: none !important }
+/* Same compact style as the old nav: 16px green icon, no circle, grey text */
 [data-ohs~="hdr-trust"] li {
-  position: relative; display: flex; align-items: center; min-height: 40px; margin: 0 !important; padding: 0 0 0 50px !important; list-style: none !important;
-  font-size: 14px !important; line-height: 20px !important; font-weight: 600 !important; color: var(--ohs-text) !important; white-space: nowrap;
+  position: relative; display: flex; align-items: center; min-height: 20px; margin: 0 !important; padding: 0 0 0 22px !important; list-style: none !important;
+  font-size: 14px !important; line-height: 20px !important; font-weight: 600 !important; color: var(--ohs-muted) !important; white-space: nowrap;
 }
-[data-ohs~="hdr-trust"] li::before { content: ""; position: absolute; left: 0; top: 50%; margin-top: -20px; width: 40px; height: 40px; border-radius: 50%; background: var(--ohs-green-50) }
 [data-ohs~="hdr-trust"] li::after {
-  content: ""; position: absolute; left: 10px; top: 50%; margin-top: -10px; width: 20px; height: 20px; background: var(--ohs-green);
+  content: ""; position: absolute; left: 0; top: 50%; margin-top: -8px; width: 16px; height: 16px; background: var(--ohs-green);
   -webkit-mask: var(--chip, var(--i-shield)) center / contain no-repeat; mask: var(--chip, var(--i-shield)) center / contain no-repeat;
 }
 [data-ohs~="hdr-trust"] li:nth-child(2) { --chip: var(--i-flask) }
 [data-ohs~="hdr-trust"] li:nth-child(3) { --chip: var(--i-check) }
-/* Figma draws the 1.5px border inside the button, so padding = 16 / 32 minus the border */
-[data-ohs~="hdr-cta"] :is(a,button) { display: inline-flex !important; width: auto !important; padding: 14.5px 30.5px !important; letter-spacing: .005em !important }
+/* Small pill, same as the old nav's .ohs-btn--sm (40px tall, 14px text) on every screen size */
+[data-ohs~="hdr-cta"] :is(a,button) { display: inline-flex !important; width: auto !important; min-height: 40px !important; padding: 8px 20px !important; font-size: 14px !important; line-height: 20px !important }
 
 /* Footer: navy, logo + line, rule, FDA disclaimer */
 [data-ohs~="ftr"] { display: flex !important; flex-direction: column !important; align-items: stretch !important; padding-top: 64px !important; padding-bottom: 64px !important; background: var(--ohs-navy-900) !important }
@@ -567,11 +582,12 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
   [data-ohs~="hdr-trust"] li:nth-child(n+3) { display: none !important }
 }
 @media (max-width: 767px) {
+  [data-ohs~="promo"] { padding: 8px 12px !important }
+  [data-ohs~="promo-text"] p { font-size: 13px !important }
   [data-ohs~="hdr"] { padding: 10px 16px !important }
   [data-ohs~="hdr"] { gap: 16px !important }
   [data-ohs~="hdr-logo"] img { width: 73px !important }
   [data-ohs~="hdr-trust"] { display: none !important }
-  [data-ohs~="hdr-cta"] :is(a,button) { padding: 6.5px 22.5px !important; font-size: 14px !important; line-height: 20px !important }
 
   [data-ohs~="ftr"] { padding: 40px 16px !important }
   [data-ohs~="ftr-logo"] { text-align: center !important }
