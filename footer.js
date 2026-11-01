@@ -271,5 +271,12 @@
     });
   }
 
-  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); });
+  /* 8 · Native header & footer: ClickFunnels sections are plain divs, so give them the
+         landmarks <header> and <footer> would have (screen readers jump by these) */
+  function initChrome() {
+    all('[data-ohs~="hdr"]').forEach(function (s) { s.setAttribute('role', 'banner'); });
+    all('[data-ohs~="ftr"]').forEach(function (s) { s.setAttribute('role', 'contentinfo'); });
+  }
+
+  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); });
 })();

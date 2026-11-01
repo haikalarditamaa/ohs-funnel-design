@@ -518,6 +518,7 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
   margin: 0 !important; box-sizing: border-box !important;
   padding-left: max(24px, calc((100% - 1200px) / 2)) !important; padding-right: max(24px, calc((100% - 1200px) / 2)) !important;
 }
+:is([data-ohs~="hdr"],[data-ohs~="ftr"]) [data-ohs~="wrap"] { padding-top: 0 !important; padding-bottom: 0 !important }
 :is([data-ohs~="hdr"],[data-ohs~="ftr"]) :is([class*="col-md-"], .col-inner) { padding-left: 0 !important; padding-right: 0 !important }
 :is([data-ohs~="hdr-logo"],[data-ohs~="hdr-trust"],[data-ohs~="hdr-cta"],[data-ohs~="ftr-logo"],[data-ohs~="ftr-line"],[data-ohs~="ftr-legal"]) { margin: 0 !important; padding: 0 !important }
 :is([data-ohs~="hdr-logo"],[data-ohs~="ftr-logo"]) img { display: block; height: auto !important; max-width: none !important; margin: 0 !important }
