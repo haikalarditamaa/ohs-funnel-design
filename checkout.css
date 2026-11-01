@@ -152,7 +152,8 @@
 [data-page-element="Checkout/V2"] .elProductCardPriceContainer .elSelectArrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ohs-green) !important; pointer-events: none }
 /* radios: ODS radio (20px ring; thick green ring when chosen) instead of ClickFunnels' dark dot */
 [data-page-element="Checkout/V2"] .elRadio { box-sizing: border-box; width: 20px !important; height: 20px !important; min-width: 20px; border: 1.5px solid var(--ohs-line) !important; border-radius: 50% !important; background: #fff !important; box-shadow: none !important; transition: border-width .15s, border-color .15s }
-[data-page-element="Checkout/V2"] .elRadioIcon { display: none !important }
+/* ClickFunnels shows its dark inner dot with `.elRadioIcon.elRadioIcon … !important`, so this needs the extra weight */
+[data-page-element="Checkout/V2"] .elRadioInput ~ .elRadio .elRadioIcon.elRadioIcon { display: none !important }
 [data-page-element="Checkout/V2"] input[type="radio"]:checked + .elRadio { border: 6px solid var(--ohs-green) !important; background: #fff !important }
 [data-page-element="Checkout/V2"] input[type="radio"]:focus-visible + .elRadio { box-shadow: var(--ohs-ring) !important }
 /* checkbox ("Use billing address same as shipping") */
