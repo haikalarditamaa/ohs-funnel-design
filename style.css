@@ -521,6 +521,11 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
   padding-left: max(24px, calc((100% - 1200px) / 2)) !important; padding-right: max(24px, calc((100% - 1200px) / 2)) !important;
 }
 [data-ohs~="hdr"] :has([data-ohs~="hdr-logo"]), [data-ohs~="ftr"] :has([data-ohs~="ftr-logo"]) { display: contents !important }
+/* ClickFunnels puts clearfix ::before / ::after on the section, row and column. Those still
+   render inside display: contents and would become invisible flex items at both ends,
+   pushing the logo and button ~180px inward. */
+:is([data-ohs~="hdr"], [data-ohs~="hdr"] :has([data-ohs~="hdr-logo"]), [data-ohs~="ftr"], [data-ohs~="ftr"] :has([data-ohs~="ftr-logo"]))::before,
+:is([data-ohs~="hdr"], [data-ohs~="hdr"] :has([data-ohs~="hdr-logo"]), [data-ohs~="ftr"], [data-ohs~="ftr"] :has([data-ohs~="ftr-logo"]))::after { content: none !important; display: none !important }
 :is([data-ohs~="hdr-logo"],[data-ohs~="hdr-trust"],[data-ohs~="hdr-cta"],[data-ohs~="ftr-logo"],[data-ohs~="ftr-line"],[data-ohs~="ftr-legal"]) { margin: 0 !important; padding: 0 !important }
 :is([data-ohs~="hdr-logo"],[data-ohs~="ftr-logo"]) img { display: block; height: auto !important; max-width: none !important; margin: 0 !important }
 
