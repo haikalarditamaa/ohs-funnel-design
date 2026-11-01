@@ -281,8 +281,12 @@
   /* 9 · Checkout page: honour ?plan=subscribe|once from the lander's plan picker.
          Sets ClickFunnels' native price dropdown (select[name="variant_price"]) to the
          product's recurring or one-time price, found in the product data ClickFunnels prints
-         next to its product card (option text as a fallback). Re-applied while the checkout
-         loads and whenever a step opens, because ClickFunnels re-renders the card. */
+         next to its product card (option text as a fallback).
+         ClickFunnels keeps the chosen price in its own cart (Checkout.computed.checkoutCart) and
+         only updates it from a change event on that dropdown, once its handlers are attached.
+         Setting the dropdown earlier shows the right plan while the cart keeps the old price
+         (the order summary and the charge follow the cart), so the change is re-sent until the
+         cart holds the wanted price. Stops for good as soon as the shopper picks a plan by hand. */
   function initCheckoutPlan() {
     var plan = new URLSearchParams(location.search).get('plan');
     if (plan !== 'subscribe' && plan !== 'once') return;
@@ -290,7 +294,18 @@
     var root = d.querySelector('[data-page-element="Checkout/V2"]');
     if (!root) return;
     var wantSub = plan === 'subscribe';
+    var userPicked = false;
+    // capture phase: ClickFunnels stops the event on the dropdown itself
+    root.addEventListener('change', function (e) {
+      if (e.isTrusted && e.target.name === 'variant_price') userPicked = true;
+    }, true);
+    function cartHas(priceId) {
+      try {
+        return window.Checkout.computed.checkoutCart.get().items.some(function (i) { return String(i.price_id) === priceId; });
+      } catch (e) { return false; }   // cart not readable: keep re-sending until the timer ends
+    }
     function apply() {
+      if (userPicked) return;
       all('select[name="variant_price"]', root).forEach(function (s) {
         var want = null;
         var card = s.closest('[data-page-element="CheckoutProductCard/V2"]');
@@ -303,15 +318,14 @@
         if (want === null) {
           Array.prototype.forEach.call(s.options, function (o) { if (want === null && /subscri|recurr|every/i.test(o.text) === wantSub) want = o.value; });
         }
-        if (want !== null && s.value !== want) {
-          s.value = want;
-          s.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+        if (want === null || (s.value === want && cartHas(want))) return;
+        s.value = want;
+        s.dispatchEvent(new Event('change', { bubbles: true }));
       });
     }
     apply();
     var n = 0;
-    var t = setInterval(function () { apply(); if (++n >= 12) clearInterval(t); }, 500);
+    var t = setInterval(function () { apply(); if (++n >= 20 || userPicked) clearInterval(t); }, 500);
     new MutationObserver(function () { apply(); }).observe(root, { subtree: true, attributes: true, attributeFilter: ['data-step-state'] });
   }
 

@@ -215,5 +215,8 @@
   [data-page-element="Checkout/V2"] .elCheckoutStepHeader { padding: 16px !important }
   [data-page-element="Checkout/V2"] .elMultiStepBody { padding: 0 16px 16px !important }
   [data-page-element="Checkout/V2"] [data-step-layout="horizontal"] .elMultiStepBody { padding-top: 20px !important }
+  /* phones: the checkout runs edge to edge (no section side padding), so its card drops the side borders and corners */
+  [data-ohs~="sec"]:has([data-page-element="Checkout/V2"]) { padding-left: 0 !important; padding-right: 0 !important }
+  [data-page-element="Checkout/V2"] [data-page-element="CheckoutMultiStep/V2"] { border-left: 0 !important; border-right: 0 !important; border-radius: 0 !important }
 }
 
