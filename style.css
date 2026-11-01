@@ -235,8 +235,8 @@ html.ohs-live { scroll-behavior: smooth }
    LISTS, BADGES, NOTES, STARS  (attribute on the Bullet List / Paragraph)
    ===================================================================== */
 /* ClickFunnels wraps Bullet List items in a span (ul > span > li): flatten it */
-:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"]) ul > span { display: contents !important }
-:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"]) li b:empty { display: none }
+:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"],[data-ohs~="hdr-trust"]) ul > span { display: contents !important }
+:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"],[data-ohs~="hdr-trust"]) li b:empty { display: none }
 
 /* badges: Bullet List → coloured pills (1 green, 2 navy, 3 neutral) */
 [data-ohs~="badges"] ul { display: flex !important; flex-wrap: wrap; gap: 8px; list-style: none !important; padding: 0 !important }
@@ -247,8 +247,8 @@ html.ohs-live { scroll-behavior: smooth }
 }
 [data-ohs~="badges"] li:nth-child(2) { background: var(--ohs-navy-50); color: var(--ohs-navy) !important }
 [data-ohs~="badges"] li:nth-child(3) { background: var(--ohs-sand-200); color: var(--ohs-text) !important }
-:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"]) li > :is(i,svg,img,.fa) { display: none !important }
-:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"]) li::marker { content: "" }
+:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"],[data-ohs~="hdr-trust"]) li > :is(i,svg,img,.fa) { display: none !important }
+:is([data-ohs~="badges"],[data-ohs~="checks"],[data-ohs~="trust-chips"],[data-ohs~="hdr-trust"]) li::marker { content: "" }
 
 /* checks: Bullet List → green tick in a soft circle */
 [data-ohs~="checks"] ul { display: grid !important; gap: 12px; list-style: none !important; padding: 0 !important }
@@ -506,6 +506,75 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
 
 
 /* =====================================================================
+   HEADER & FOOTER  (native elements · Figma: Funnel Header & Footer, 60:858)
+   Header  Section hdr → Row wrap → 1 column:
+             Image hdr-logo · Bullet List hdr-trust · Button "btn btn-plain hdr-cta"
+   Footer  Section ftr → Row wrap → 1 column:
+             Image ftr-logo · Paragraph ftr-line · Paragraph ftr-legal
+   Whatever directly holds the logo element (the column) becomes the header bar,
+   so no extra rows, columns or code are needed.
+   ===================================================================== */
+:is([data-ohs~="hdr"],[data-ohs~="ftr"]) {
+  margin: 0 !important; box-sizing: border-box !important;
+  padding-left: max(24px, calc((100% - 1200px) / 2)) !important; padding-right: max(24px, calc((100% - 1200px) / 2)) !important;
+}
+:is([data-ohs~="hdr"],[data-ohs~="ftr"]) :is([class*="col-md-"], .col-inner) { padding-left: 0 !important; padding-right: 0 !important }
+:is([data-ohs~="hdr-logo"],[data-ohs~="hdr-trust"],[data-ohs~="hdr-cta"],[data-ohs~="ftr-logo"],[data-ohs~="ftr-line"],[data-ohs~="ftr-legal"]) { margin: 0 !important; padding: 0 !important }
+:is([data-ohs~="hdr-logo"],[data-ohs~="ftr-logo"]) img { display: block; height: auto !important; max-width: none !important; margin: 0 !important }
+
+/* Header: white bar, logo · trust items · Buy now */
+[data-ohs~="hdr"] { padding-top: 16px !important; padding-bottom: 16px !important; background: #fff !important; border-bottom: 1px solid var(--ohs-line) !important }
+[data-ohs~="hdr"] :has(> [data-ohs~="hdr-logo"]) {
+  display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+  align-items: center !important; justify-content: space-between !important; gap: 40px !important;
+}
+:is([data-ohs~="hdr-logo"],[data-ohs~="hdr-cta"]) { flex: none !important; width: auto !important }
+[data-ohs~="hdr-logo"] img { width: 88px !important }
+[data-ohs~="hdr-trust"] ul { display: flex !important; align-items: center; gap: 24px; margin: 0 !important; padding: 0 !important; list-style: none !important }
+[data-ohs~="hdr-trust"] li {
+  position: relative; display: flex; align-items: center; min-height: 40px; margin: 0 !important; padding: 0 0 0 50px !important; list-style: none !important;
+  font-size: 14px !important; line-height: 20px !important; font-weight: 600 !important; color: var(--ohs-text) !important; white-space: nowrap;
+}
+[data-ohs~="hdr-trust"] li::before { content: ""; position: absolute; left: 0; top: 50%; margin-top: -20px; width: 40px; height: 40px; border-radius: 50%; background: var(--ohs-green-50) }
+[data-ohs~="hdr-trust"] li::after {
+  content: ""; position: absolute; left: 10px; top: 50%; margin-top: -10px; width: 20px; height: 20px; background: var(--ohs-green);
+  -webkit-mask: var(--chip, var(--i-shield)) center / contain no-repeat; mask: var(--chip, var(--i-shield)) center / contain no-repeat;
+}
+[data-ohs~="hdr-trust"] li:nth-child(2) { --chip: var(--i-flask) }
+[data-ohs~="hdr-trust"] li:nth-child(3) { --chip: var(--i-check) }
+/* Figma draws the 1.5px border inside the button, so padding = 16 / 32 minus the border */
+[data-ohs~="hdr-cta"] :is(a,button) { display: inline-flex !important; width: auto !important; padding: 14.5px 30.5px !important; letter-spacing: .005em !important }
+
+/* Footer: navy, logo + line, rule, FDA disclaimer */
+[data-ohs~="ftr"] { padding-top: 64px !important; padding-bottom: 64px !important; background: var(--ohs-navy-900) !important }
+[data-ohs~="ftr-logo"] { text-align: left !important }
+[data-ohs~="ftr-logo"] img { width: 139px !important }
+[data-ohs~="ftr-line"] { margin-top: 16px !important }
+[data-ohs~="ftr-line"] p { font-size: 16px !important; line-height: 24px !important; font-weight: 400 !important; color: var(--ohs-navy-50) !important; text-align: left !important }
+[data-ohs~="ftr-legal"] { margin-top: 48px !important; padding-top: 48px !important; border-top: 1px solid rgba(255,255,255,.15) !important }
+[data-ohs~="ftr-legal"] p { font-size: 12px !important; line-height: 16px !important; font-weight: 500 !important; color: var(--ohs-navy-50) !important; opacity: .75; text-align: left !important }
+
+@media (max-width: 1023px) {
+  [data-ohs~="hdr-trust"] li:nth-child(n+3) { display: none !important }
+}
+@media (max-width: 767px) {
+  [data-ohs~="hdr"] { padding: 10px 16px !important }
+  [data-ohs~="hdr"] :has(> [data-ohs~="hdr-logo"]) { gap: 16px !important }
+  [data-ohs~="hdr-logo"] img { width: 73px !important }
+  [data-ohs~="hdr-trust"] { display: none !important }
+  [data-ohs~="hdr-cta"] :is(a,button) { padding: 6.5px 22.5px !important; font-size: 14px !important; line-height: 20px !important }
+
+  [data-ohs~="ftr"] { padding: 40px 16px !important }
+  [data-ohs~="ftr-logo"] { text-align: center !important }
+  [data-ohs~="ftr-logo"] img { width: 103px !important; margin: 0 auto !important }
+  [data-ohs~="ftr-line"] p, [data-ohs~="ftr-legal"] p { text-align: center !important }
+  [data-ohs~="ftr-legal"] { margin-top: 24px !important; padding-top: 24px !important }
+  /* room for the sticky "Add to cart" bar so it never covers the disclaimer */
+  body:has(.ohs-sticky) [data-ohs~="ftr"] { padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important }
+}
+
+
+/* =====================================================================
    SNIPPETS  (.ohs markup pasted into Custom JS/HTML elements)
    ===================================================================== */
 .ohs { color: var(--ohs-text); font-size: 16px; line-height: 24px; -webkit-font-smoothing: antialiased }
@@ -563,6 +632,9 @@ html.ohs-motion :is([data-ohs~="trust"],[data-ohs~="reveal"]) { transition: opac
 }
 
 /* ---- Plan picker ---- */
+/* plan-slot: a native Paragraph that the Footer Code fills with the plan picker */
+[data-ohs~="plan-slot"] { margin: 0 !important; padding: 0 !important }
+[data-ohs~="plan-slot"]:has(.ohs-plan) > :not(.ohs-plan) { display: none !important }
 .ohs-plan { display: grid; gap: 12px; margin-top: 24px }
 .ohs-plan__head { display: flex; align-items: center; justify-content: space-between; gap: 12px }
 .ohs-plan__label { font-size: 16px; line-height: 24px; font-weight: 600; color: var(--ohs-ink) }
