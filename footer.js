@@ -13,7 +13,20 @@
     keep.set('plan', plan);
     return base + (base.indexOf('?') > -1 ? '&' : '?') + keep.toString();
   }
+  /* The plan picker markup (generated from paste/plan-picker.html by build.py). Used when the
+     page has a native element tagged "plan-slot" instead of the Custom JS/HTML snippet, so the
+     picker doesn't depend on ClickFunnels keeping a Custom HTML block. The slot's own Custom
+     Attribute "data-checkout" carries the checkout URL. */
+  var PLAN_HTML = "<div class=\"ohs ohs-plan\" data-ohs-plan data-checkout=\"CHECKOUT_URL\"><div class=\"ohs-plan__head\"><span class=\"ohs-plan__label\">Choose how you buy</span><span class=\"ohs-badge ohs-badge--green\">Save &#36;4 / month</span></div><div class=\"ohs-plan__options\"><button type=\"button\" class=\"ohs-plan__opt is-selected\" data-plan=\"subscribe\" data-price=\"36.00\" data-short=\"Subscribe\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">Subscribe &amp; Save 10%</span><span class=\"ohs-plan__price\">&#36;36.00</span><span class=\"ohs-plan__detail\">Delivered every 30 days · Skip, pause or cancel anytime</span></span></button><button type=\"button\" class=\"ohs-plan__opt\" data-plan=\"once\" data-price=\"40.00\" data-short=\"One-time\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">One-time purchase</span><span class=\"ohs-plan__price\">&#36;40.00</span><span class=\"ohs-plan__detail\">Paying with HSA/FSA via TrueMed? Choose this option.</span></span></button></div><a class=\"ohs-btn ohs-btn--block ohs-plan__cta\" href=\"CHECKOUT_URL?plan=subscribe\">Add to cart · <span data-ohs-price>&#36;36.00</span></a><ul class=\"ohs-plan__micro\"><li class=\"ohs-i ohs-i--lock\">Secure checkout</li><li class=\"ohs-i ohs-i--truck\">Usually ready in 24 hrs</li><li class=\"ohs-i ohs-i--shield\">30-day money-back guarantee</li></ul><div class=\"ohs ohs-sticky\" data-ohs-sticky><img class=\"ohs-sticky__img\" src=\"https://www.optimalhealthsystems.com/cdn/shop/files/OHS-NanoBlue1.png?width=120\" alt=\"\" width=\"48\" height=\"48\"><span class=\"ohs-sticky__text\"><span class=\"ohs-sticky__name\">Optimal NanoBlue</span><span class=\"ohs-sticky__meta\" data-ohs-sticky-meta>&#36;36.00 · Subscribe</span></span><a class=\"ohs-btn ohs-btn--plain\" data-ohs-sticky-cta href=\"CHECKOUT_URL?plan=subscribe\">Add to cart</a></div></div>";
+  function initPlanSlots() {
+    all('[data-ohs~="plan-slot"]').forEach(function (slot) {
+      if (slot.querySelector('[data-ohs-plan]') || d.querySelector('[data-ohs-plan]')) return;
+      var url = slot.getAttribute('data-checkout') || 'CHECKOUT_URL';
+      slot.insertAdjacentHTML('beforeend', PLAN_HTML.split('CHECKOUT_URL').join(url));
+    });
+  }
   function initPlan() {
+    initPlanSlots();
     all('[data-ohs-plan]').forEach(function (box) {
       var base = box.getAttribute('data-checkout') || '';
       var cta = box.querySelector('.ohs-plan__cta');
