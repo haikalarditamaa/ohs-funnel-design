@@ -338,13 +338,21 @@
     '[data-ohs~="hdr"][data-ohs-hdr~="stuck"]{box-shadow:0 4px 12px rgba(31,45,74,.08)}' +
     '[data-ohs~="hdr"][data-ohs-hdr~="hidden"]{transform:translateY(-100%);box-shadow:none}' +
     '@media (prefers-reduced-motion:reduce){[data-ohs~="hdr"]{transition:none}}';
+  /* Style fixes made after the live style.css (too large to push from here); each is also in
+     src/base.css, so they become no-ops once style.css is next updated on GitHub. */
+  var FIX_CSS =
+    '[data-ohs~="card"] .col-inner{margin-left:0!important;margin-right:0!important}';   // card text in line with its icon
+  function addCss(id, css) {
+    if (d.getElementById(id)) return false;
+    var st = d.createElement('style');
+    st.id = id;
+    st.textContent = css;
+    d.head.appendChild(st);
+    return true;
+  }
   function initStickyHeader() {
     var h = d.querySelector('[data-ohs~="hdr"]');
-    if (!h || d.getElementById('ohs-hdr-css')) return;
-    var st = d.createElement('style');
-    st.id = 'ohs-hdr-css';
-    st.textContent = HDR_CSS;
-    d.head.appendChild(st);
+    if (!h || !addCss('ohs-hdr-css', HDR_CSS)) return;
     var prev = h.previousElementSibling;                  // the promo bar, if any
     var last = window.pageYOffset, ticking = false;
     function set(stuck, hidden) { h.setAttribute('data-ohs-hdr', (stuck ? 'stuck' : '') + (hidden ? ' hidden' : '')); }
@@ -363,5 +371,6 @@
     update();
   }
 
+  addCss('ohs-fix-css', FIX_CSS);
   ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); initCheckoutPlan(); initStickyHeader(); });
 })();
