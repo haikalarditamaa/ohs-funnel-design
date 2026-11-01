@@ -13,6 +13,7 @@
   --ohs-shadow-3: 0 8px 16px rgba(31,45,74,.08), 0 24px 56px rgba(31,45,74,.16);
   --ohs-ease: cubic-bezier(.2,.7,.2,1);
   --ohs-ring: 0 0 0 2px #fff, 0 0 0 4px var(--ohs-focus);
+  --i-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M 5 12 L 19 12 M 13 6 L 19 12 L 13 18'/%3E%3C/svg%3E");
 }
 /* =====================================================================
    NATIVE CHECKOUT  (any page with ClickFunnels' Checkout element: store product page,
@@ -60,25 +61,41 @@
 [data-page-element="Checkout/V2"] .elCheckoutFormLabelDivider { flex: 1; margin: 0 !important; border: 0 !important; border-top: 1px solid var(--ohs-line) !important }
 /* fields: separate rounded boxes instead of ClickFunnels' joined groups */
 [data-page-element="Checkout/V2"] .elCheckoutFormRow { display: grid !important; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px; margin: 0 0 12px !important }
-[data-page-element="Checkout/V2"] .elCheckoutForm :is(.elInputWrapper, .elSelectWrapper), [data-page-element="Checkout/V2"] .elCheckoutInput {
+[data-page-element="Checkout/V2"] :is(.elInputWrapper, .elSelectWrapper), [data-page-element="Checkout/V2"] .elCheckoutInput {
   margin: 0 !important; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important; box-shadow: none !important;
   transition: border-color .2s, box-shadow .2s;
 }
-[data-page-element="Checkout/V2"] .elCheckoutForm :is(.elInputWrapper, .elSelectWrapper):focus-within { border-color: var(--ohs-green) !important; box-shadow: 0 0 0 3px var(--ohs-green-50) !important }
-[data-page-element="Checkout/V2"] .elCheckoutForm :is(.elInput, .elSelect) { min-height: 50px; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: transparent !important; box-shadow: none !important; font-size: 16px !important; color: var(--ohs-ink) !important }
-[data-page-element="Checkout/V2"] .elCheckoutForm .elLabel label { font-size: 12px !important; color: var(--ohs-muted) !important }
+[data-page-element="Checkout/V2"] :is(.elInputWrapper, .elSelectWrapper):focus-within { border-color: var(--ohs-green) !important; box-shadow: 0 0 0 3px var(--ohs-green-50) !important }
+[data-page-element="Checkout/V2"] :is(.elInputWrapper, .elSelectWrapper) :is(.elInput, .elSelect) { min-height: 50px; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: transparent !important; box-shadow: none !important; font-size: 16px !important; color: var(--ohs-ink) !important }
+[data-page-element="Checkout/V2"] .elLabel label { font-size: 12px !important; color: var(--ohs-muted) !important }
+/* ClickFunnels' floating labels draw their own partial border (.borderHolder, #c0bfcf, 5px corners)
+   inside the field: that was the second, overlapping outline. The wrapper's border is the only one. */
+[data-page-element="Checkout/V2"] :is(.elInputWrapper, .elSelectWrapper) div.inputHolder { border: 0 !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] .elLabel .borderHolder { border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important }
 [data-page-element="Checkout/V2"] :is(.payment-card-number-mount, .payment-card-date-mount, .payment-card-cvv-mount) { min-height: 52px; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important }
 [data-page-element="Checkout/V2"] .elCheckboxText { font-size: 14px !important; color: var(--ohs-text) !important }
-/* Next / Submit: ODS primary pill */
+/* Next / Submit: ODS Button (Figma 5:68 · Primary, Large): 56px pill, 1.5px border, Bold 16/24.
+   Default: green, no arrow. Hover: white with green outline, green-700 text, arrow slides in.
+   Focused (keyboard): 2px white + 2px blue ring. */
 [data-page-element="Checkout/V2"] .elBTN .elButton {
-  display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important;
-  width: 100% !important; min-height: 52px; padding: 14px 32px !important; border: 0 !important; border-radius: 999px !important;
+  display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; justify-content: center !important; gap: 0;
+  width: 100% !important; min-height: 56px; padding: 14.5px 32px !important; box-sizing: border-box; /* 14.5 + 1.5 border = Figma's 16 inside stroke */
+  border: 1.5px solid var(--ohs-green) !important; border-radius: 999px !important;
   background: var(--ohs-green) !important; color: #fff !important; box-shadow: none !important;
-  font-size: 16px !important; line-height: 24px !important; font-weight: 700 !important; letter-spacing: .03em !important;
+  font-size: 16px !important; line-height: 24px !important; font-weight: 700 !important; letter-spacing: .005em !important; text-decoration: none !important;
+  transition: background-color .2s var(--ohs-ease), color .2s var(--ohs-ease), box-shadow .2s var(--ohs-ease);
 }
-[data-page-element="Checkout/V2"] .elBTN .elButton:hover { background: var(--ohs-green-700) !important }
+[data-page-element="Checkout/V2"] .elBTN .elButton * { color: inherit !important; font: inherit !important; letter-spacing: inherit !important }
+[data-page-element="Checkout/V2"] .elBTN .elButtonSpinner, [data-page-element="Checkout/V2"] .elBTN .elButtonSub:empty { display: none !important }
+[data-page-element="Checkout/V2"] .elBTN .elButton::after {
+  content: ""; flex: none; width: 0; height: 20px; margin-left: 0; opacity: 0; background: currentColor;
+  -webkit-mask: var(--i-arrow) center / 20px 20px no-repeat; mask: var(--i-arrow) center / 20px 20px no-repeat;
+  transition: width .2s var(--ohs-ease), margin-left .2s var(--ohs-ease), opacity .2s var(--ohs-ease);
+}
+[data-page-element="Checkout/V2"] .elBTN .elButton:hover { background: #fff !important; color: var(--ohs-green-700) !important }
+[data-page-element="Checkout/V2"] .elBTN .elButton:is(:hover, :focus-visible)::after { width: 20px; margin-left: 8px; opacity: 1 }
 [data-page-element="Checkout/V2"] .elBTN .elButton:focus-visible { outline: none !important; box-shadow: var(--ohs-ring) !important }
-[data-page-element="Checkout/V2"] .elBTN .elButton * { color: inherit !important; font: inherit !important }
+@media (prefers-reduced-motion: reduce) { [data-page-element="Checkout/V2"] .elBTN .elButton, [data-page-element="Checkout/V2"] .elBTN .elButton::after { transition: none } }
 /* order summary + "existing subscription" notice */
 [data-page-element="Checkout/V2"] .elOrderSummaryWrapper { margin: 12px 0 !important; padding: 4px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-sand) !important }
 [data-page-element="Checkout/V2"] .elOrderSummaryHeadText { font-weight: 600 !important; color: var(--ohs-ink) !important }
