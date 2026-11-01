@@ -1,5 +1,5 @@
 /* OHS · NATIVE CHECKOUT SKIN (also inside style.css; this copy can be @imported on its own) */
-[data-page-element="Checkout/V2"] {
+[data-page-element="Checkout/V2"], [data-page-element="CheckoutLogin/V2"] {
   --ohs-green: #108474; --ohs-green-700: #0b6b5e; --ohs-green-100: #d3eae5; --ohs-green-50: #eef6f4;
   --ohs-navy-900: #1f2d4a; --ohs-navy: #324770; --ohs-navy-50: #eceff5;
   --ohs-gold: #ffd520; --ohs-gold-500: #ebc300; --ohs-gold-50: #fff8d6;
@@ -72,7 +72,14 @@
    inside the field: that was the second, overlapping outline. The wrapper's border is the only one. */
 [data-page-element="Checkout/V2"] :is(.elInputWrapper, .elSelectWrapper) div.inputHolder { border: 0 !important; box-shadow: none !important }
 [data-page-element="Checkout/V2"] .elLabel .borderHolder { border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important }
-[data-page-element="Checkout/V2"] :is(.payment-card-number-mount, .payment-card-date-mount, .payment-card-cvv-mount) { min-height: 52px; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important }
+/* card fields: ONE rounded box with thin separators (ClickFunnels drew an outer box plus a box per field).
+   The text inside is drawn by the payment provider in its own frames. */
+[data-page-element="Checkout/V2"] .payment-card-fields-container { display: flex !important; align-items: stretch; overflow: hidden; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] .payment-card-fields-container:focus-within { border-color: var(--ohs-green) !important; box-shadow: 0 0 0 3px var(--ohs-green-50) !important }
+[data-page-element="Checkout/V2"] .payment-card-date-cvv-container { display: flex !important; flex: 0 0 auto; border: 0 !important; margin: 0 !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] :is(.payment-card-number-mount, .payment-card-date-mount, .payment-card-cvv-mount) { min-height: 52px; margin: 0 !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] .payment-card-number-mount { flex: 1 1 auto }
+[data-page-element="Checkout/V2"] :is(.payment-card-date-mount, .payment-card-cvv-mount) { border-left: 1px solid var(--ohs-line) !important }
 [data-page-element="Checkout/V2"] .elCheckboxText { font-size: 14px !important; color: var(--ohs-text) !important }
 /* Next / Submit: ODS Button (Figma 5:68 · Primary, Large): 56px pill, 1.5px border, Bold 16/24.
    Default: green, no arrow. Hover: white with green outline, green-700 text, arrow slides in.
@@ -97,13 +104,17 @@
 [data-page-element="Checkout/V2"] .elBTN .elButton:focus-visible { outline: none !important; box-shadow: var(--ohs-ring) !important }
 @media (prefers-reduced-motion: reduce) { [data-page-element="Checkout/V2"] .elBTN .elButton, [data-page-element="Checkout/V2"] .elBTN .elButton::after { transition: none } }
 /* order summary + "existing subscription" notice */
-[data-page-element="Checkout/V2"] .elOrderSummaryWrapper { margin: 12px 0 !important; padding: 4px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-sand) !important }
+[data-page-element="Checkout/V2"] .elOrderSummaryWrapper { margin: 16px 0 !important; padding: 8px 20px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-sand) !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] .elOrderSummaryWrapper .elCheckoutWrapper { margin: 0 !important; padding: 8px 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] .elOrderSummaryRow { color: var(--ohs-text) !important; border-color: var(--ohs-line) !important }
+[data-page-element="Checkout/V2"] .elOrderSummaryHead i, [data-page-element="Checkout/V2"] .elOrderSummaryToggleable { color: var(--ohs-green) !important }
 [data-page-element="Checkout/V2"] .elOrderSummaryHeadText { font-weight: 600 !important; color: var(--ohs-ink) !important }
 [data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner { padding: 14px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-gold-50) !important }
 [data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner * { font-size: 14px !important; line-height: 20px !important; color: var(--ohs-text) !important }
 [data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner a { color: var(--ohs-green) !important; font-weight: 600 !important }
 /* horizontal layout: tabs in one row → flat ODS stepper (no dark arrow) */
 [data-page-element="Checkout/V2"] [data-step-layout="horizontal"] .elMultiStepStep { border: 0 !important }
+[data-page-element="Checkout/V2"] [data-step-layout="horizontal"] .elMultiStepBody { padding-top: 28px !important }
 [data-page-element="Checkout/V2"] .elMultiStepTabs { display: flex !important; gap: 0; margin: 0 !important; border-bottom: 1px solid var(--ohs-line) !important; background: none !important }
 [data-page-element="Checkout/V2"] .elMultiStepHeader { flex: 1 1 0; margin: 0 !important; background: none !important; box-shadow: inset 0 -2px 0 transparent }
 [data-page-element="Checkout/V2"] .elMultiStepTabs .elCheckoutStepHeader { clip-path: none !important; background: none !important; border: 0 !important }
@@ -139,11 +150,56 @@
 [data-page-element="Checkout/V2"] .elProductCardPriceContainer .elSelectWrapper { position: relative; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important }
 [data-page-element="Checkout/V2"] .elProductCardPriceContainer select { width: 100%; min-height: 48px; padding: 0 40px 0 14px !important; border: 0 !important; background: transparent !important; font-size: 15px !important; font-weight: 600 !important; color: var(--ohs-ink) !important; text-align: left !important; text-align-last: left !important; appearance: none; -webkit-appearance: none }
 [data-page-element="Checkout/V2"] .elProductCardPriceContainer .elSelectArrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ohs-green) !important; pointer-events: none }
-[data-page-element="Checkout/V2"] .elRadioIcon, [data-page-element="Checkout/V2"] .elRadio { border-color: var(--ohs-green) !important }
-[data-page-element="Checkout/V2"] input[type="radio"]:checked + .elRadio { background: var(--ohs-green) !important; border-color: var(--ohs-green) !important }
+/* radios: ODS radio (20px ring; thick green ring when chosen) instead of ClickFunnels' dark dot */
+[data-page-element="Checkout/V2"] .elRadio { box-sizing: border-box; width: 20px !important; height: 20px !important; min-width: 20px; border: 1.5px solid var(--ohs-line) !important; border-radius: 50% !important; background: #fff !important; box-shadow: none !important; transition: border-width .15s, border-color .15s }
+[data-page-element="Checkout/V2"] .elRadioIcon { display: none !important }
+[data-page-element="Checkout/V2"] input[type="radio"]:checked + .elRadio { border: 6px solid var(--ohs-green) !important; background: #fff !important }
+[data-page-element="Checkout/V2"] input[type="radio"]:focus-visible + .elRadio { box-shadow: var(--ohs-ring) !important }
+/* checkbox ("Use billing address same as shipping") */
+[data-page-element="Checkout/V2"] .elCheckbox { box-sizing: border-box; display: grid !important; place-items: center; width: 20px !important; height: 20px !important; min-width: 20px; border: 1.5px solid var(--ohs-line) !important; border-radius: var(--ohs-r-sm) !important; background: #fff !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] .elCheckboxIconSquare { display: none !important }
+[data-page-element="Checkout/V2"] .elCheckboxIconCheck { font-size: 11px !important; color: #fff !important; opacity: 0 }
+[data-page-element="Checkout/V2"] .elCheckboxInput:checked + .elCheckbox { border-color: var(--ohs-green) !important; background: var(--ohs-green) !important }
+[data-page-element="Checkout/V2"] .elCheckboxInput:checked + .elCheckbox .elCheckboxIconCheck { opacity: 1 }
+[data-page-element="Checkout/V2"] .elCheckboxInput:focus-visible + .elCheckbox { box-shadow: var(--ohs-ring) !important }
+/* delivery options (Payment step): ODS option cards like the product card */
+[data-page-element="Checkout/V2"] .elShippingProfile { position: relative; padding: 16px !important; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important; box-shadow: none !important }
+[data-page-element="Checkout/V2"] .elShippingProfile:has(input:checked) { border: 2px solid var(--ohs-green) !important; padding: 15px !important; background: var(--ohs-green-50) !important }
+[data-page-element="Checkout/V2"] .elShippingProfileLayoutBackground { display: none !important }
+[data-page-element="Checkout/V2"] .elShippingProfile :is(p, span, div) { font-size: 15px; color: var(--ohs-ink) }
+[data-page-element="Checkout/V2"] .elShippingProfilesEmpty .elShippingProfile { border-style: dashed !important; background: var(--ohs-sand) !important; text-align: center }
+[data-page-element="Checkout/V2"] .elShippingProfilesEmpty :is(p, i) { color: var(--ohs-muted) !important; font-size: 14px !important }
+
+/* returning-customer code screen ("We recognize you…"): ODS title, code boxes and text links */
+[data-page-element="CheckoutLogin/V2"] { font-family: var(--ohs-font) !important }
+[data-page-element="CheckoutLogin/V2"] :is(h1, h2, h3, h4, p, span, a, label):not(i) { font-family: var(--ohs-font) !important }
+[data-page-element="CheckoutLogin/V2"] .elSubheadline, [data-page-element="CheckoutLogin/V2"] .elSubheadline * { font-size: 26px !important; line-height: 34px !important; font-weight: 700 !important; letter-spacing: -.01em !important; color: var(--ohs-ink) !important }
+[data-page-element="CheckoutLogin/V2"] .elParagraph, [data-page-element="CheckoutLogin/V2"] .elParagraph > span { font-size: 16px !important; line-height: 24px !important; color: var(--ohs-text) !important }
+[data-page-element="CheckoutLogin/V2"] .elOtpInputBorder { border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important; box-shadow: none !important }
+[data-page-element="CheckoutLogin/V2"] .elCheckoutLoginInputContent:focus-within .elOtpInputBorder { border-color: var(--ohs-green) !important }
+[data-page-element="CheckoutLogin/V2"] .elCheckoutLoginInputContent, [data-page-element="CheckoutLogin/V2"] .elOtpInputBorderWrapper { background: none !important }
+[data-page-element="CheckoutLogin/V2"] .elBTN .elButton {
+  display: flex !important; align-items: center !important; justify-content: center !important; min-height: 56px; padding: 14.5px 32px !important; box-sizing: border-box;
+  border: 1.5px solid var(--ohs-green) !important; border-radius: 999px !important; background: var(--ohs-green) !important; color: #fff !important; box-shadow: none !important;
+  font-size: 16px !important; line-height: 24px !important; font-weight: 700 !important; text-decoration: none !important;
+}
+[data-page-element="CheckoutLogin/V2"] .elBTN .elButton * { color: inherit !important; font: inherit !important }
+[data-page-element="CheckoutLogin/V2"] .elBTN .elButton:hover { background: #fff !important; color: var(--ohs-green-700) !important }
+[data-page-element="CheckoutLogin/V2"] .elBTN .elButton:focus-visible { outline: none !important; box-shadow: var(--ohs-ring) !important }
+/* "Resend code  or  Checkout as guest": text links with breathing room (they were one uppercase run-on) */
+[data-page-element="CheckoutLogin/V2"] .elParagraph:has(.elLinkContinueAsGuest) > span { display: inline-flex !important; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; font-size: 14px !important; color: var(--ohs-muted) !important; text-transform: none !important; letter-spacing: 0 !important }
+[data-page-element="CheckoutLogin/V2"] .elResendCode { display: inline-flex !important; align-items: center; gap: 12px; color: var(--ohs-muted) !important; text-transform: none !important }
+[data-page-element="CheckoutLogin/V2"] .elLink {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px;
+  font-size: 15px !important; line-height: 20px !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important;
+  color: var(--ohs-green) !important; text-decoration: underline !important; text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+[data-page-element="CheckoutLogin/V2"] .elLink:hover { color: var(--ohs-green-700) !important }
+[data-page-element="CheckoutLogin/V2"] .elLink:focus-visible { outline: 2px solid var(--ohs-focus) !important; outline-offset: 2px; border-radius: 4px }
 
 @media (max-width: 767px) {
   [data-page-element="Checkout/V2"] .elCheckoutStepHeader { padding: 16px !important }
   [data-page-element="Checkout/V2"] .elMultiStepBody { padding: 0 16px 16px !important }
+  [data-page-element="Checkout/V2"] [data-step-layout="horizontal"] .elMultiStepBody { padding-top: 20px !important }
 }
 
