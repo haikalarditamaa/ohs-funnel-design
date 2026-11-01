@@ -278,5 +278,42 @@
     all('[data-ohs~="ftr"]').forEach(function (s) { s.setAttribute('role', 'contentinfo'); });
   }
 
-  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); });
+  /* 9 · Checkout page: honour ?plan=subscribe|once from the lander's plan picker.
+         Sets ClickFunnels' native price dropdown (select[name="variant_price"]) to the
+         product's recurring or one-time price, found in the product data ClickFunnels prints
+         next to its product card (option text as a fallback). Re-applied while the checkout
+         loads and whenever a step opens, because ClickFunnels re-renders the card. */
+  function initCheckoutPlan() {
+    var plan = new URLSearchParams(location.search).get('plan');
+    if (plan !== 'subscribe' && plan !== 'once') return;
+    if (d.querySelector('[data-ohs-plan-native]')) return;   // store page: its own picker handles this
+    var root = d.querySelector('[data-page-element="Checkout/V2"]');
+    if (!root) return;
+    var wantSub = plan === 'subscribe';
+    function apply() {
+      all('select[name="variant_price"]', root).forEach(function (s) {
+        var want = null;
+        var card = s.closest('[data-page-element="CheckoutProductCard/V2"]');
+        var json = card && card.parentElement.querySelector('script[type="application/json"]');
+        try {
+          var data = JSON.parse(json.textContent);
+          var v = data.variant || data.product.default_variant;
+          v.prices.forEach(function (p) { if (want === null && !!p.is_recurring === wantSub) want = String(p.id); });
+        } catch (e) {}
+        if (want === null) {
+          Array.prototype.forEach.call(s.options, function (o) { if (want === null && /subscri|recurr|every/i.test(o.text) === wantSub) want = o.value; });
+        }
+        if (want !== null && s.value !== want) {
+          s.value = want;
+          s.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    }
+    apply();
+    var n = 0;
+    var t = setInterval(function () { apply(); if (++n >= 12) clearInterval(t); }, 500);
+    new MutationObserver(function () { apply(); }).observe(root, { subtree: true, attributes: true, attributeFilter: ['data-step-state'] });
+  }
+
+  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); initCheckoutPlan(); });
 })();

@@ -1,0 +1,132 @@
+/* OHS · NATIVE CHECKOUT SKIN (also inside style.css; this copy can be @imported on its own) */
+[data-page-element="Checkout/V2"] {
+  --ohs-green: #108474; --ohs-green-700: #0b6b5e; --ohs-green-100: #d3eae5; --ohs-green-50: #eef6f4;
+  --ohs-navy-900: #1f2d4a; --ohs-navy: #324770; --ohs-navy-50: #eceff5;
+  --ohs-gold: #ffd520; --ohs-gold-500: #ebc300; --ohs-gold-50: #fff8d6;
+  --ohs-blue: #1f4fc4; --ohs-focus: #1f4fc4;
+  --ohs-ink: #121212; --ohs-text: #363636; --ohs-muted: #5f5f5f; --ohs-line: #dedad3;
+  --ohs-sand-200: #eceae6; --ohs-sand: #f5f4f2; --ohs-white: #fff;
+  --ohs-font: "Red Hat Display", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ohs-r-sm: 6px; --ohs-r-md: 12px; --ohs-r-lg: 20px; --ohs-r-xl: 28px;
+  --ohs-shadow-1: 0 1px 2px rgba(31,45,74,.06), 0 4px 12px rgba(31,45,74,.06);
+  --ohs-shadow-2: 0 4px 8px rgba(31,45,74,.06), 0 12px 32px rgba(31,45,74,.10);
+  --ohs-shadow-3: 0 8px 16px rgba(31,45,74,.08), 0 24px 56px rgba(31,45,74,.16);
+  --ohs-ease: cubic-bezier(.2,.7,.2,1);
+  --ohs-ring: 0 0 0 2px #fff, 0 0 0 4px var(--ohs-focus);
+}
+/* =====================================================================
+   NATIVE CHECKOUT  (any page with ClickFunnels' Checkout element: store product page,
+   checkout steps). The skin needs no tag; the "checkout" column token is only for the
+   store page's plan picker (open/closed state below).
+   ClickFunnels markup (checked on the live store page and on /test-checkout):
+     Checkout/V2 > CheckoutMultiStep/V2 > .elMultiStepStep ×3 (Select Product, Shipping, Payment)
+     each step: .elCheckoutStepHeader (marker + title) + .elMultiStepBody[data-step-state="active"]
+     fields: .elInputWrapper / .elSelectWrapper (floating labels), card fields in .payment-card-*-mount
+   With the product plan picker, the Footer Code sets data-ohs-co="closed|open" on the column:
+   closed hides the checkout, open shows it with ClickFunnels' Select Product step hidden
+   (the ODS plan cards replace it) and the remaining steps relabelled 1 and 2.
+   Two step layouts exist: vertical (a header above each step's body) and horizontal
+   (data-step-layout="horizontal": all tabs in one .elMultiStepTabs row, arrow on the active tab).
+   ===================================================================== */
+[data-ohs~="checkout"][data-ohs-co="closed"] [data-page-element="Checkout/V2"] { display: none !important }
+[data-ohs~="checkout"][data-ohs-co="open"] .ohs-plan__cta { display: none }
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(1 of .elMultiStepStep),
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(2 of .elMultiStepStep) .elMultiStepGoBack { display: none !important }
+[data-page-element="Checkout/V2"],
+[data-page-element="Checkout/V2"] :not(i):not(.fa):not(.fas):not(.fab) { font-family: var(--ohs-font) !important }
+[data-page-element="Checkout/V2"] [data-page-element="CheckoutMultiStep/V2"] { border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-lg) !important; background: #fff !important; box-shadow: none !important; overflow: hidden }
+[data-page-element="Checkout/V2"] .elMultiStepStep { margin: 0 !important; border: 0 !important; border-top: 1px solid var(--ohs-line) !important }
+[data-page-element="Checkout/V2"] .elMultiStepStep:nth-child(1 of .elMultiStepStep),
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(2 of .elMultiStepStep) { border-top: 0 !important }
+/* step header: number in a circle, green when that step is open */
+[data-page-element="Checkout/V2"] .elCheckoutStepHeader { padding: 18px 20px !important; border: 0 !important; background: none !important }
+[data-page-element="Checkout/V2"] .elCheckoutStepHeaderContent { display: flex !important; align-items: center !important; gap: 12px }
+[data-page-element="Checkout/V2"] .elCheckoutStepMarker { flex: none; display: grid !important; place-items: center; width: 28px !important; height: 28px !important; border: 0 !important; border-radius: 50% !important; background: var(--ohs-sand-200) !important }
+[data-page-element="Checkout/V2"] .elCheckoutStepMarkerText { font-size: 14px !important; line-height: 20px !important; font-weight: 700 !important; color: var(--ohs-text) !important }
+[data-ohs~="checkout"][data-ohs-co] .elCheckoutStepMarkerText { font-size: 0 !important; line-height: 0 !important }
+[data-ohs~="checkout"][data-ohs-co] .elCheckoutStepMarkerText::after { font-size: 14px; line-height: 20px; font-weight: 700; color: var(--ohs-text) }
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(2 of .elMultiStepStep) .elCheckoutStepMarkerText::after { content: "1" }
+[data-ohs~="checkout"][data-ohs-co] .elMultiStepStep:nth-child(3 of .elMultiStepStep) .elCheckoutStepMarkerText::after { content: "2" }
+[data-page-element="Checkout/V2"] .elMultiStepStep:has(> .elMultiStepBody[data-step-state="active"]) .elCheckoutStepMarker { background: var(--ohs-green) !important }
+[data-page-element="Checkout/V2"] .elMultiStepStep:has(> .elMultiStepBody[data-step-state="active"]) .elCheckoutStepMarkerText,
+[data-page-element="Checkout/V2"] .elMultiStepStep:has(> .elMultiStepBody[data-step-state="active"]) .elCheckoutStepMarkerText::after { color: #fff !important }
+[data-page-element="Checkout/V2"] .elCheckoutStepTitle { font-size: 16px !important; line-height: 24px !important; font-weight: 600 !important; color: var(--ohs-ink) !important }
+[data-page-element="Checkout/V2"] .elCheckoutStepSubtitle { font-size: 13px !important; line-height: 18px !important; color: var(--ohs-muted) !important }
+[data-page-element="Checkout/V2"] .elMultiStepBody { padding: 0 20px 20px !important }
+[data-page-element="Checkout/V2"] .elMultiStepGoBack a { color: var(--ohs-green) !important; font-size: 14px !important; font-weight: 600 !important; text-decoration: none !important }
+/* section labels ("SHIPPING INFORMATION") */
+[data-page-element="Checkout/V2"] .elCheckoutFormLabelContainer { display: flex; align-items: center; gap: 12px; margin: 20px 0 12px !important }
+[data-page-element="Checkout/V2"] .elCheckoutFormLabel { font-size: 12px !important; line-height: 16px !important; font-weight: 700 !important; letter-spacing: .12em !important; text-transform: uppercase !important; color: var(--ohs-green) !important; white-space: nowrap }
+[data-page-element="Checkout/V2"] .elCheckoutFormLabelDivider { flex: 1; margin: 0 !important; border: 0 !important; border-top: 1px solid var(--ohs-line) !important }
+/* fields: separate rounded boxes instead of ClickFunnels' joined groups */
+[data-page-element="Checkout/V2"] .elCheckoutFormRow { display: grid !important; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px; margin: 0 0 12px !important }
+[data-page-element="Checkout/V2"] .elCheckoutForm :is(.elInputWrapper, .elSelectWrapper), [data-page-element="Checkout/V2"] .elCheckoutInput {
+  margin: 0 !important; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important; box-shadow: none !important;
+  transition: border-color .2s, box-shadow .2s;
+}
+[data-page-element="Checkout/V2"] .elCheckoutForm :is(.elInputWrapper, .elSelectWrapper):focus-within { border-color: var(--ohs-green) !important; box-shadow: 0 0 0 3px var(--ohs-green-50) !important }
+[data-page-element="Checkout/V2"] .elCheckoutForm :is(.elInput, .elSelect) { min-height: 50px; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: transparent !important; box-shadow: none !important; font-size: 16px !important; color: var(--ohs-ink) !important }
+[data-page-element="Checkout/V2"] .elCheckoutForm .elLabel label { font-size: 12px !important; color: var(--ohs-muted) !important }
+[data-page-element="Checkout/V2"] :is(.payment-card-number-mount, .payment-card-date-mount, .payment-card-cvv-mount) { min-height: 52px; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important }
+[data-page-element="Checkout/V2"] .elCheckboxText { font-size: 14px !important; color: var(--ohs-text) !important }
+/* Next / Submit: ODS primary pill */
+[data-page-element="Checkout/V2"] .elBTN .elButton {
+  display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important;
+  width: 100% !important; min-height: 52px; padding: 14px 32px !important; border: 0 !important; border-radius: 999px !important;
+  background: var(--ohs-green) !important; color: #fff !important; box-shadow: none !important;
+  font-size: 16px !important; line-height: 24px !important; font-weight: 700 !important; letter-spacing: .03em !important;
+}
+[data-page-element="Checkout/V2"] .elBTN .elButton:hover { background: var(--ohs-green-700) !important }
+[data-page-element="Checkout/V2"] .elBTN .elButton:focus-visible { outline: none !important; box-shadow: var(--ohs-ring) !important }
+[data-page-element="Checkout/V2"] .elBTN .elButton * { color: inherit !important; font: inherit !important }
+/* order summary + "existing subscription" notice */
+[data-page-element="Checkout/V2"] .elOrderSummaryWrapper { margin: 12px 0 !important; padding: 4px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-sand) !important }
+[data-page-element="Checkout/V2"] .elOrderSummaryHeadText { font-weight: 600 !important; color: var(--ohs-ink) !important }
+[data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner { padding: 14px 16px !important; border: 0 !important; border-radius: var(--ohs-r-md) !important; background: var(--ohs-gold-50) !important }
+[data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner * { font-size: 14px !important; line-height: 20px !important; color: var(--ohs-text) !important }
+[data-page-element="Checkout/V2"] .elSubscriptionDuplicateBanner a { color: var(--ohs-green) !important; font-weight: 600 !important }
+/* horizontal layout: tabs in one row → flat ODS stepper (no dark arrow) */
+[data-page-element="Checkout/V2"] [data-step-layout="horizontal"] .elMultiStepStep { border: 0 !important }
+[data-page-element="Checkout/V2"] .elMultiStepTabs { display: flex !important; gap: 0; margin: 0 !important; border-bottom: 1px solid var(--ohs-line) !important; background: none !important }
+[data-page-element="Checkout/V2"] .elMultiStepHeader { flex: 1 1 0; margin: 0 !important; background: none !important; box-shadow: inset 0 -2px 0 transparent }
+[data-page-element="Checkout/V2"] .elMultiStepTabs .elCheckoutStepHeader { clip-path: none !important; background: none !important; border: 0 !important }
+[data-page-element="Checkout/V2"] .elMultiStepTabs .elCheckoutStepHeader::before,
+[data-page-element="Checkout/V2"] .elMultiStepTabs .elCheckoutStepHeader::after,
+[data-page-element="Checkout/V2"] .elMultiStepTabs .elMultiStepHeader::before,
+[data-page-element="Checkout/V2"] .elMultiStepTabs .elMultiStepHeader::after,
+[data-page-element="Checkout/V2"] .elCheckoutHeaderExtraSpace { display: none !important }
+[data-page-element="Checkout/V2"] .elMultiStepHeader[data-step-state="active"] { box-shadow: inset 0 -2px 0 var(--ohs-green) }
+[data-page-element="Checkout/V2"] .elMultiStepHeader[data-step-state="active"] .elCheckoutStepMarker { background: var(--ohs-green) !important }
+[data-page-element="Checkout/V2"] .elMultiStepHeader[data-step-state="active"] .elCheckoutStepMarkerText { color: #fff !important }
+[data-page-element="Checkout/V2"] .elMultiStepHeader:not([data-step-state="active"]) .elCheckoutStepTitle { color: var(--ohs-muted) !important }
+/* the second title/subtitle copy ClickFunnels prints for small screens */
+[data-page-element="Checkout/V2"] .elCheckoutTitleContainer + .elCheckoutTitleContainer { display: none !important }
+/* product card (Payment step): ODS purchase-option card */
+[data-page-element="Checkout/V2"] [data-page-element="CheckoutProductCard/V2"] {
+  position: relative; display: flex !important; align-items: flex-start; gap: 12px; flex-wrap: wrap;
+  margin: 0 0 12px !important; padding: 16px !important; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important;
+}
+[data-page-element="Checkout/V2"] [data-page-element="CheckoutProductCard/V2"]:has(input[name="product"]:checked),
+[data-page-element="Checkout/V2"] [data-page-element="CheckoutProductCard/V2"].elProductSelected { border: 2px solid var(--ohs-green) !important; padding: 15px !important; background: var(--ohs-green-50) !important }
+[data-page-element="Checkout/V2"] .elProductLayoutBackground { display: none !important }
+[data-page-element="Checkout/V2"] .elProductCardNameContainer { flex: 1 1 200px; min-width: 0 }
+[data-page-element="Checkout/V2"] .elProductCardInfoName { display: block; font-size: 16px !important; line-height: 24px !important; font-weight: 600 !important; color: var(--ohs-ink) !important }
+[data-page-element="Checkout/V2"] .elProductCardInfoDescription { display: block; margin-top: 4px; font-size: 14px !important; line-height: 20px !important; color: var(--ohs-muted) !important }
+[data-page-element="Checkout/V2"] .elProductCardHighlight {
+  display: inline-flex; margin: 0 0 6px !important; padding: 4px 10px !important; border-radius: 999px !important; background: var(--ohs-gold) !important; color: var(--ohs-ink) !important;
+  width: max-content !important; max-width: 100%; align-self: flex-start;
+  font-size: 11px !important; line-height: 14px !important; font-weight: 700 !important; letter-spacing: .12em !important; text-transform: uppercase;
+}
+[data-page-element="Checkout/V2"] .elProductCardImage img { width: 56px !important; height: 56px !important; object-fit: contain; border-radius: var(--ohs-r-md); background: var(--ohs-sand) }
+[data-page-element="Checkout/V2"] .elProductCardPriceContainer { flex: 1 1 100% }
+[data-page-element="Checkout/V2"] .elProductCardPriceContainer .elSelectWrapper { position: relative; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-md) !important; background: #fff !important }
+[data-page-element="Checkout/V2"] .elProductCardPriceContainer select { width: 100%; min-height: 48px; padding: 0 40px 0 14px !important; border: 0 !important; background: transparent !important; font-size: 15px !important; font-weight: 600 !important; color: var(--ohs-ink) !important; text-align: left !important; text-align-last: left !important; appearance: none; -webkit-appearance: none }
+[data-page-element="Checkout/V2"] .elProductCardPriceContainer .elSelectArrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ohs-green) !important; pointer-events: none }
+[data-page-element="Checkout/V2"] .elRadioIcon, [data-page-element="Checkout/V2"] .elRadio { border-color: var(--ohs-green) !important }
+[data-page-element="Checkout/V2"] input[type="radio"]:checked + .elRadio { background: var(--ohs-green) !important; border-color: var(--ohs-green) !important }
+
+@media (max-width: 767px) {
+  [data-page-element="Checkout/V2"] .elCheckoutStepHeader { padding: 16px !important }
+  [data-page-element="Checkout/V2"] .elMultiStepBody { padding: 0 16px 16px !important }
+}
+
