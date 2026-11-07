@@ -17,7 +17,7 @@
 [data-page-element="CheckoutProductImageCarousel/V1"] .slider-main { height: auto !important; aspect-ratio: 1 / 1 }
 [data-page-element="CheckoutProductImageCarousel/V1"] .slider-main .swiper-wrapper { height: 100% !important }
 [data-page-element="CheckoutProductImageCarousel/V1"] .slider-main .swiper-slide { height: 100% !important; display: flex !important; align-items: center; justify-content: center; background: transparent !important }
-[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main .swiper-slide img { width: 92% !important; height: 92% !important; max-width: none !important; object-fit: contain !important; border-radius: 0 !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main .swiper-slide img { width: 100% !important; height: 100% !important; max-width: none !important; object-fit: contain !important; border-radius: 0 !important }
 
 /* Arrows: white circles, shown on hover / keyboard focus */
 [data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-next,
