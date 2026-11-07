@@ -1,0 +1,61 @@
+/* OHS · ClickFunnels' Product Image Carousel (CheckoutProductImageCarousel, built on Swiper),
+   reskinned to match the custom gallery: square sand stage with rounded corners, five square
+   thumbnail tiles with a green active border, white round arrows on hover. Phones: edge to edge,
+   swipe, no thumbnails (footer.js adds a 1 / n counter there).
+   No tag needed. Optional promo pill: give the carousel a Custom Attribute data-badge
+   (e.g. 15% off · code BIRTHDAY). Pure CSS, so it also shows in the ClickFunnels editor.
+   Loaded two ways: @import of carousel.css in the page CSS (styles the editor too), and
+   embedded in footer.js (live page). build.py writes both from this file. */
+[data-page-element="CheckoutProductImageCarousel/V1"] { position: relative; padding-left: 0 !important; padding-right: 0 !important }
+/* ClickFunnels gives the carousel a fixed height (500px on phones): let the square stage set it */
+[data-page-element="CheckoutProductImageCarousel/V1"] .elCheckoutProductImageCarouselContainer { padding: 0 !important; height: auto !important; min-height: 0 !important; max-height: none !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .elProductImageCarouselOuterFrame,
+[data-page-element="CheckoutProductImageCarousel/V1"] .elProductCarouselMainImageOuterFrame { display: none !important }
+
+/* Stage */
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main-wrapper { position: relative; height: auto !important; min-height: 0 !important; max-height: none !important; border-radius: var(--ohs-r-xl, 28px); background: var(--ohs-sand, #f5f4f2); overflow: hidden }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main { height: auto !important; aspect-ratio: 1 / 1 }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main .swiper-wrapper { height: 100% !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main .swiper-slide { height: 100% !important; display: flex !important; align-items: center; justify-content: center; background: transparent !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main .swiper-slide img { width: 92% !important; height: 92% !important; max-width: none !important; object-fit: contain !important; border-radius: 0 !important }
+
+/* Arrows: white circles, shown on hover / keyboard focus */
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-next,
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-prev { width: 40px !important; height: 40px !important; margin-top: -20px !important; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(31, 45, 74, .12); color: var(--ohs-ink, #1f2d4a) !important; opacity: 0; transition: opacity .2s }
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-next { right: 16px !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-prev { left: 16px !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-next::after,
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-prev::after { font-size: 14px !important; font-weight: 700 }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main-wrapper:hover .swiper-button-next,
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-main-wrapper:hover .swiper-button-prev,
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-next:focus-visible,
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-prev:focus-visible { opacity: 1 }
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-disabled { opacity: 0 !important; pointer-events: none }
+
+/* Thumbnails: five square tiles */
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav-wrapper { margin-top: 16px }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav { height: auto !important; overflow: visible !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-wrapper { display: grid !important; grid-template-columns: repeat(5, 1fr); gap: 16px; transform: none !important; height: auto !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide { width: auto !important; height: auto !important; margin: 0 !important; aspect-ratio: 1 / 1; border: 1px solid var(--ohs-line, #dedad3); border-radius: var(--ohs-r-md, 12px) !important; background: var(--ohs-sand, #f5f4f2); overflow: hidden; cursor: pointer; opacity: 1 !important; transition: border-color .2s }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide:hover { border-color: var(--ohs-green-100, #d3eae5) }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide-thumb-active { border: 2px solid var(--ohs-green, #108474) }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide img { width: 100% !important; height: 100% !important; object-fit: contain !important; padding: 6px; border-radius: 0 !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .swiper-scrollbar { display: none !important }
+
+/* Promo pill from the data-badge attribute (same look as .ohs-badge--gold) */
+[data-page-element="CheckoutProductImageCarousel/V1"][data-badge]::before { content: attr(data-badge); position: absolute; z-index: 5; left: 20px; top: 20px; display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; background: var(--ohs-gold, #ffd520); color: var(--ohs-ink, #1f2d4a); font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; pointer-events: none }
+[data-page-element="CheckoutProductImageCarousel/V1"][data-badge=""]::before { display: none }
+
+/* Phone counter (added by footer.js) */
+.ohs-carousel__count { position: absolute; z-index: 5; right: 20px; top: 20px; padding: 4px 10px; border-radius: 999px; background: #fff; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--ohs-text, #3a4458); pointer-events: none }
+@media (min-width: 768px) { .ohs-carousel__count { display: none } }
+
+@media (max-width: 767px) {
+  [data-page-element="CheckoutProductImageCarousel/V1"] { margin-left: -16px !important; margin-right: -16px !important }
+  [data-page-element="CheckoutProductImageCarousel/V1"] .slider-main-wrapper { border-radius: 0 }
+  [data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav-wrapper,
+  [data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-next,
+  [data-page-element="CheckoutProductImageCarousel/V1"] .swiper-button-prev { display: none !important }
+  [data-page-element="CheckoutProductImageCarousel/V1"][data-badge]::before { left: 16px; top: 16px }
+  .ohs-carousel__count { right: 16px; top: 16px }
+}
