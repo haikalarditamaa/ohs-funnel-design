@@ -4,8 +4,8 @@
    swipe, no thumbnails (footer.js adds a 1 / n counter there).
    No tag needed. Optional promo pill: give the carousel a Custom Attribute data-badge
    (e.g. 15% off · code BIRTHDAY). Pure CSS, so it also shows in the ClickFunnels editor.
-   Loaded two ways: @import of carousel.css in the page CSS (styles the editor too), and
-   embedded in footer.js (live page). build.py writes both from this file. */
+   Loaded two ways: footer.js adds it on the live page (from its own jsDelivr commit), and an
+   @import of carousel.css in the page CSS styles the ClickFunnels editor too. */
 [data-page-element="CheckoutProductImageCarousel/V1"] { position: relative; padding-left: 0 !important; padding-right: 0 !important }
 /* ClickFunnels gives the carousel a fixed height (500px on phones): let the square stage set it */
 [data-page-element="CheckoutProductImageCarousel/V1"] .elCheckoutProductImageCarouselContainer { padding: 0 !important; height: auto !important; min-height: 0 !important; max-height: none !important }

@@ -1,5 +1,6 @@
 (function () {
   var d = document;
+  var SELF = (d.currentScript && d.currentScript.src) || '';   // e.g. …/ohs-funnel-design@<commit>/footer.js
   function all(sel, ctx) { return Array.prototype.slice.call((ctx || d).querySelectorAll(sel)); }
   function ready(fn) { if (d.readyState !== 'loading') fn(); else d.addEventListener('DOMContentLoaded', fn); }
 
@@ -498,57 +499,38 @@
           reskinned to match the custom gallery (sand stage, rounded corners, 5 thumbnail tiles with
           a green active border; on phones edge to edge, swipe, a 1 / n counter, no thumbnails).
           No tag needed: it styles every carousel on pages that load this script.
-          Optional badge: give the carousel a Custom Attribute data-badge (e.g. 15% off · code BIRTHDAY).
-          ClickFunnels re-renders the carousel when the product changes, so the badge and counter
-          are re-added when they disappear. */
+          Optional badge: give the carousel a Custom Attribute data-badge (e.g. 15% off · code BIRTHDAY);
+          it is drawn by the CSS, so it also shows in the editor. ClickFunnels re-renders the carousel
+          when the product changes, so the phone counter is re-added when it disappears. */
   var CAROUSEL = '[data-page-element="CheckoutProductImageCarousel/V1"]';
-  var CAROUSEL_CSS =
-    CAROUSEL + ' .elCheckoutProductImageCarouselContainer{padding:0!important}' +
-    CAROUSEL + ' .elProductImageCarouselOuterFrame,' + CAROUSEL + ' .elProductCarouselMainImageOuterFrame{display:none!important}' +
-    CAROUSEL + ' .slider-main-wrapper{position:relative;border-radius:var(--ohs-r-xl,28px);background:var(--ohs-sand,#f5f4f2);overflow:hidden}' +
-    CAROUSEL + ' .slider-main{height:auto!important;aspect-ratio:1/1}' +
-    CAROUSEL + ' .slider-main .swiper-wrapper{height:100%!important}' +
-    CAROUSEL + ' .slider-main .swiper-slide{height:100%!important;display:flex!important;align-items:center;justify-content:center;background:transparent!important}' +
-    CAROUSEL + ' .slider-main .swiper-slide img{width:92%!important;height:92%!important;max-width:none!important;object-fit:contain!important;border-radius:0!important}' +
-    CAROUSEL + ' .swiper-button-next,' + CAROUSEL + ' .swiper-button-prev{width:40px!important;height:40px!important;margin-top:-20px!important;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(31,45,74,.12);color:var(--ohs-ink,#1f2d4a)!important;opacity:0;transition:opacity .2s}' +
-    CAROUSEL + ' .swiper-button-next{right:16px!important}' + CAROUSEL + ' .swiper-button-prev{left:16px!important}' +
-    CAROUSEL + ' .swiper-button-next::after,' + CAROUSEL + ' .swiper-button-prev::after{font-size:14px!important;font-weight:700}' +
-    CAROUSEL + ' .slider-main-wrapper:hover .swiper-button-next,' + CAROUSEL + ' .slider-main-wrapper:hover .swiper-button-prev,' +
-      CAROUSEL + ' .swiper-button-next:focus-visible,' + CAROUSEL + ' .swiper-button-prev:focus-visible{opacity:1}' +
-    CAROUSEL + ' .swiper-button-disabled{opacity:0!important;pointer-events:none}' +
-    CAROUSEL + ' .slider-nav-wrapper{margin-top:16px}' +
-    CAROUSEL + ' .slider-nav{height:auto!important;overflow:visible!important}' +
-    CAROUSEL + ' .slider-nav .swiper-wrapper{display:grid!important;grid-template-columns:repeat(5,1fr);gap:16px;transform:none!important;height:auto!important}' +
-    CAROUSEL + ' .slider-nav .swiper-slide{width:auto!important;height:auto!important;margin:0!important;aspect-ratio:1/1;border:1px solid var(--ohs-line,#dedad3);border-radius:var(--ohs-r-md,12px)!important;background:var(--ohs-sand,#f5f4f2);overflow:hidden;cursor:pointer;opacity:1!important;transition:border-color .2s}' +
-    CAROUSEL + ' .slider-nav .swiper-slide:hover{border-color:var(--ohs-green-100,#bcd9cb)}' +
-    CAROUSEL + ' .slider-nav .swiper-slide-thumb-active{border:2px solid var(--ohs-green,#108474)}' +
-    CAROUSEL + ' .slider-nav .swiper-slide img{width:100%!important;height:100%!important;object-fit:contain!important;padding:6px;border-radius:0!important}' +
-    CAROUSEL + ' .swiper-scrollbar{display:none!important}' +
-    '.ohs-carousel__badge{position:absolute;z-index:3;left:20px;top:20px;pointer-events:none}' +
-    '.ohs-carousel__count{position:absolute;z-index:3;right:20px;top:20px;padding:4px 10px;border-radius:999px;background:#fff;font-size:12px;line-height:16px;font-weight:600;color:var(--ohs-text,#3a4458);pointer-events:none}' +
-    '@media (min-width:768px){.ohs-carousel__count{display:none}}' +
-    '@media (max-width:767px){' +
-      CAROUSEL + '{margin-left:-16px!important;margin-right:-16px!important}' +
-      CAROUSEL + ' .slider-main-wrapper{border-radius:0}' +
-      CAROUSEL + ' .slider-nav-wrapper,' + CAROUSEL + ' .swiper-button-next,' + CAROUSEL + ' .swiper-button-prev{display:none!important}' +
-      '.ohs-carousel__badge{left:16px;top:16px}.ohs-carousel__count{right:16px;top:16px}}';
+  /* The skin itself is carousel.css (src/carousel.css). It is loaded from the same jsDelivr commit as
+     this script, so the two always match; the page CSS can also @import it, which styles the editor. */
+  var CAROUSEL_CSS_URL = /\/footer\.js(\?.*)?$/.test(SELF)
+    ? SELF.replace(/footer\.js(\?.*)?$/, 'carousel.css')
+    : 'https://cdn.jsdelivr.net/gh/haikalarditamaa/ohs-funnel-design@main/carousel.css';
   function initCarousel() {
     var list = all(CAROUSEL);
     if (!list.length) return;
-    addCss('ohs-carousel-css', CAROUSEL_CSS);
+    // Swiper measured the slides before the skin changed their size: have it measure again
+    function remeasure() {
+      all(CAROUSEL + ' .swiper', d).forEach(function (el) { try { if (el.swiper) el.swiper.update(); } catch (e) {} });
+    }
+    if (!d.getElementById('ohs-carousel-css')) {
+      var link = d.createElement('link');
+      link.id = 'ohs-carousel-css';
+      link.rel = 'stylesheet';
+      link.href = CAROUSEL_CSS_URL;
+      link.onload = function () { remeasure(); setTimeout(remeasure, 300); };
+      d.head.appendChild(link);
+    }
+    remeasure();
+    window.addEventListener('load', remeasure);
     list.forEach(function (c) {
       var busy = false;
       function dress() {
         var stage = c.querySelector('.slider-main-wrapper');
         if (!stage) return;
         busy = true;
-        var text = c.getAttribute('data-badge');
-        if (text && !stage.querySelector('.ohs-carousel__badge')) {
-          var b = d.createElement('span');
-          b.className = 'ohs-badge ohs-badge--gold ohs-carousel__badge';
-          b.textContent = text;
-          stage.appendChild(b);
-        }
         var slides = all('.slider-main .swiper-slide:not(.swiper-slide-duplicate)', c);
         var count = stage.querySelector('.ohs-carousel__count');
         if (slides.length > 1) {
