@@ -4,20 +4,21 @@
   function ready(fn) { if (d.readyState !== 'loading') fn(); else d.addEventListener('DOMContentLoaded', fn); }
 
   /* 1 + 2 · Plan picker and sticky bar */
-  function checkoutUrl(base, plan) {
+  function checkoutUrl(base, plan, bottles) {
     // Pass marketing tags (utm_*, ad click ids) through to checkout; drop everything else (e.g. preview=true)
     var keep = new URLSearchParams();
     new URLSearchParams(location.search).forEach(function (v, k) {
       if (/^utm_/.test(k) || /^(fbclid|gclid|msclkid|ttclid|affiliate_id|aff_sub)$/.test(k)) keep.set(k, v);
     });
     keep.set('plan', plan);
+    keep.set('bottles', bottles || '1');
     return base + (base.indexOf('?') > -1 ? '&' : '?') + keep.toString();
   }
   /* The plan picker markup (generated from paste/plan-picker.html by build.py). Used when the
      page has a native element tagged "plan-slot" instead of the Custom JS/HTML snippet, so the
      picker doesn't depend on ClickFunnels keeping a Custom HTML block. The slot's own Custom
      Attribute "data-checkout" carries the checkout URL. */
-  var PLAN_HTML = "<div class=\"ohs ohs-plan\" data-ohs-plan data-checkout=\"CHECKOUT_URL\"><div class=\"ohs-plan__head\"><span class=\"ohs-plan__label\">Choose how you buy</span><span class=\"ohs-badge ohs-badge--green\">Save &#36;4 / month</span></div><div class=\"ohs-plan__options\"><button type=\"button\" class=\"ohs-plan__opt is-selected\" data-plan=\"subscribe\" data-price=\"36.00\" data-short=\"Subscribe\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">Subscribe &amp; Save 10%</span><span class=\"ohs-plan__price\">&#36;36.00</span><span class=\"ohs-plan__detail\">Delivered every 30 days · Skip, pause or cancel anytime</span></span></button><button type=\"button\" class=\"ohs-plan__opt\" data-plan=\"once\" data-price=\"40.00\" data-short=\"One-time\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">One-time purchase</span><span class=\"ohs-plan__price\">&#36;40.00</span><span class=\"ohs-plan__detail\">Paying with HSA/FSA via TrueMed? Choose this option.</span></span></button></div><a class=\"ohs-btn ohs-btn--block ohs-plan__cta\" href=\"CHECKOUT_URL?plan=subscribe\">Add to cart · <span data-ohs-price>&#36;36.00</span></a><ul class=\"ohs-plan__micro\"><li class=\"ohs-i ohs-i--lock\">Secure checkout</li><li class=\"ohs-i ohs-i--truck\">Usually ready in 24 hrs</li><li class=\"ohs-i ohs-i--shield\">30-day money-back guarantee</li></ul><div class=\"ohs ohs-sticky\" data-ohs-sticky><img class=\"ohs-sticky__img\" src=\"https://www.optimalhealthsystems.com/cdn/shop/files/OHS-NanoBlue1.png?width=120\" alt=\"\" width=\"48\" height=\"48\"><span class=\"ohs-sticky__text\"><span class=\"ohs-sticky__name\">Optimal NanoBlue</span><span class=\"ohs-sticky__meta\" data-ohs-sticky-meta>&#36;36.00 · Subscribe</span></span><a class=\"ohs-btn ohs-btn--plain\" data-ohs-sticky-cta href=\"CHECKOUT_URL?plan=subscribe\">Add to cart</a></div></div>";
+  var PLAN_HTML = "<div class=\"ohs ohs-plan\" data-ohs-plan data-checkout=\"CHECKOUT_URL\"><div class=\"ohs-plan__head\"><span class=\"ohs-plan__label\">Choose how you buy</span><span class=\"ohs-badge ohs-badge--green\" data-ohs-save>Save &#36;4 / month</span></div><div class=\"ohs-plan__options\"><div class=\"ohs-plan__opt is-selected\" data-plan=\"subscribe\" data-price=\"36.00\" data-short=\"Subscribe\" data-sizes=\"1|36.00|Every month · 1 bottle;3|72.00|Every 3 months · 3 bottles;5|108.00|Every 5 months · 5 bottles\" data-size-label=\"How often\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">Subscribe &amp; Save 10%</span><span class=\"ohs-plan__price\">&#36;36.00</span><span class=\"ohs-plan__detail\" data-detail=\"Skip, pause or cancel anytime\" data-detail-1=\"Delivered every 30 days · Skip, pause or cancel anytime\">Delivered every 30 days · Skip, pause or cancel anytime</span></span></div><div class=\"ohs-plan__opt\" data-plan=\"once\" data-price=\"40.00\" data-short=\"One-time\" data-sizes=\"1|40.00|1 bottle;3|80.00|Buy 3 bottles;5|120.00|Buy 5 bottles\" data-size-label=\"How many bottles\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">One-time purchase</span><span class=\"ohs-plan__price\">&#36;40.00</span><span class=\"ohs-plan__detail\" data-detail=\"Paying with HSA/FSA via TrueMed? Choose this option.\">Paying with HSA/FSA via TrueMed? Choose this option.</span></span></div></div><a class=\"ohs-btn ohs-btn--block ohs-plan__cta\" href=\"CHECKOUT_URL?plan=subscribe&amp;bottles=1\">Add to cart · <span data-ohs-price>&#36;36.00</span></a><ul class=\"ohs-plan__micro\"><li class=\"ohs-i ohs-i--lock\">Secure checkout</li><li class=\"ohs-i ohs-i--truck\">Usually ready in 24 hrs</li><li class=\"ohs-i ohs-i--shield\">30-day money-back guarantee</li></ul><div class=\"ohs ohs-sticky\" data-ohs-sticky><img class=\"ohs-sticky__img\" src=\"https://www.optimalhealthsystems.com/cdn/shop/files/OHS-NanoBlue1.png?width=120\" alt=\"\" width=\"48\" height=\"48\"><span class=\"ohs-sticky__text\"><span class=\"ohs-sticky__name\">Optimal NanoBlue</span><span class=\"ohs-sticky__meta\" data-ohs-sticky-meta>&#36;36.00 · Subscribe</span></span><a class=\"ohs-btn ohs-btn--plain\" data-ohs-sticky-cta href=\"CHECKOUT_URL?plan=subscribe&amp;bottles=1\">Add to cart</a></div></div>";
   function initPlanSlots() {
     all('[data-ohs~="plan-slot"]').forEach(function (slot) {
       if (slot.querySelector('[data-ohs-plan]') || d.querySelector('[data-ohs-plan]')) return;
@@ -25,12 +26,34 @@
       slot.insertAdjacentHTML('beforeend', PLAN_HTML.split('CHECKOUT_URL').join(url));
     });
   }
+  /* Bottle dropdowns: each plan card lists its choices in data-sizes as
+     "bottles|price|label;…" (one per ClickFunnels product: NanoBlue, NanoBlue - 3 Bottles, …).
+     The <select> is built here, not in the snippet, because ClickFunnels drops custom HTML
+     that contains form inputs. */
+  var PLAN_CSS =
+    '.ohs-plan__opt{align-items:flex-start}' +
+    '.ohs-plan__size{grid-column:1/-1;position:relative;margin:8px 0 4px}' +
+    '.ohs-plan__size select{display:block;width:100%;height:44px;margin:0;padding:0 40px 0 14px;border:1px solid var(--ohs-line,#d9dee5);border-radius:12px;' +
+      'background:#fff;color:var(--ohs-ink,#1f2d4a);font:inherit;font-size:15px;font-weight:500;line-height:20px;cursor:pointer;-webkit-appearance:none;appearance:none;box-shadow:none}' +
+    '.ohs-plan__size select:hover{border-color:var(--ohs-green-100,#bcd9cb)}' +
+    '.ohs-plan__size select:focus-visible{outline:none;border-color:var(--ohs-green,#2f7a5b);box-shadow:var(--ohs-ring,0 0 0 3px rgba(47,122,91,.25))}' +
+    '.ohs-plan__size::after{content:"";position:absolute;right:16px;top:50%;width:8px;height:8px;margin-top:-6px;border:solid var(--ohs-ink,#1f2d4a);border-width:0 2px 2px 0;transform:rotate(45deg);pointer-events:none}' +
+    '.ohs-plan__opt:not(.is-selected) .ohs-plan__size select{background:#fff;color:var(--ohs-muted,#5b6577)}';
+  function parseSizes(s) {
+    return (s || '').split(';').map(function (part) {
+      var p = part.split('|');
+      return p.length >= 3 ? { qty: p[0].trim(), price: p[1].trim(), label: p.slice(2).join('|').trim() } : null;
+    }).filter(Boolean);
+  }
+  function fmt(n) { return '$' + (Math.round(n * 100) / 100).toFixed(2); }
+
   function initPlan() {
     initPlanSlots();
     all('[data-ohs-plan]').forEach(function (box) {
       var base = box.getAttribute('data-checkout') || '';
       var cta = box.querySelector('.ohs-plan__cta');
       var price = box.querySelector('[data-ohs-price]');
+      var save = box.querySelector('[data-ohs-save]');
       var sticky = box.querySelector('[data-ohs-sticky]');
       var stickyCta = sticky && sticky.querySelector('[data-ohs-sticky-cta]');
       var stickyMeta = sticky && sticky.querySelector('[data-ohs-sticky-meta]');
@@ -40,17 +63,82 @@
       if (!d.getElementById('buy')) box.id = 'buy';
       if (group) { group.setAttribute('role', 'radiogroup'); group.setAttribute('aria-label', 'Choose how you buy'); }
       all('.ohs-plan__radio', box).forEach(function (r) { r.setAttribute('aria-hidden', 'true'); });
-      opts.forEach(function (o) { o.setAttribute('role', 'radio'); });
-      function money(o) { return '$' + o.getAttribute('data-price'); }
+      if (opts.some(function (o) { return o.hasAttribute('data-sizes'); })) addCss('ohs-plan-css', PLAN_CSS);
+
+      // Build each card's bottle dropdown
+      opts.forEach(function (o, i) {
+        o.setAttribute('role', 'radio');
+        var sizes = parseSizes(o.getAttribute('data-sizes'));
+        o.ohsSizes = sizes;
+        var title = o.querySelector('.ohs-plan__title');
+        if (title) { title.id = title.id || 'ohs-plan-t' + i; o.setAttribute('aria-labelledby', title.id); }
+        if (sizes.length < 2 || o.querySelector('.ohs-plan__size')) return;
+        var wrap = d.createElement('span');
+        wrap.className = 'ohs-plan__size';
+        var sel = d.createElement('select');
+        sel.setAttribute('aria-label', (o.getAttribute('data-size-label') || 'Bottles') + ' · ' + (title ? title.textContent : ''));
+        sizes.forEach(function (s) {
+          var op = d.createElement('option');
+          op.value = s.qty;
+          op.textContent = s.label + ' · ' + fmt(parseFloat(s.price));
+          sel.appendChild(op);
+        });
+        wrap.appendChild(sel);
+        var body = o.querySelector('.ohs-plan__body') || o;
+        body.insertBefore(wrap, body.querySelector('.ohs-plan__detail'));
+        o.ohsSelect = sel;
+        // the dropdown sits inside the card: a click on it must not bubble into the card's
+        // keyboard / click handling in a way that steals focus, but it does pick that plan
+        sel.addEventListener('click', function (e) { e.stopPropagation(); if (!o.classList.contains('is-selected')) choose(o); });
+        sel.addEventListener('keydown', function (e) { e.stopPropagation(); });
+        sel.addEventListener('change', function () { choose(o); });
+      });
+
+      function size(o) {
+        var sizes = o.ohsSizes || [];
+        var q = o.ohsSelect ? o.ohsSelect.value : (sizes[0] && sizes[0].qty);
+        for (var i = 0; i < sizes.length; i++) if (sizes[i].qty === q) return sizes[i];
+        return { qty: '1', price: o.getAttribute('data-price'), label: '' };
+      }
+      function priceFor(plan, qty) {
+        var o = opts.filter(function (x) { return x.getAttribute('data-plan') === plan; })[0];
+        var s = o && (o.ohsSizes || []).filter(function (x) { return x.qty === qty; })[0];
+        return s ? parseFloat(s.price) : (o && qty === '1' ? parseFloat(o.getAttribute('data-price')) : NaN);
+      }
       function current() { return box.querySelector('.ohs-plan__opt.is-selected') || opts[0]; }
       function sync() {
         var opt = current();
         if (!opt) return;
-        var href = checkoutUrl(base, opt.getAttribute('data-plan'));
-        if (price) price.textContent = money(opt);
+        opts.forEach(function (o) {
+          var s = size(o);
+          var p = o.querySelector('.ohs-plan__price');
+          if (p) p.textContent = fmt(parseFloat(s.price));
+          var det = o.querySelector('.ohs-plan__detail');
+          if (det && det.hasAttribute('data-detail')) {
+            var q = parseInt(s.qty, 10) || 1;
+            det.textContent = q > 1
+              ? fmt(parseFloat(s.price) / q) + ' per bottle · ' + det.getAttribute('data-detail')
+              : (det.getAttribute('data-detail-1') || det.getAttribute('data-detail'));
+          }
+        });
+        var cur = size(opt);
+        var plan = opt.getAttribute('data-plan');
+        var href = checkoutUrl(base, plan, cur.qty);
+        var amount = fmt(parseFloat(cur.price));
+        if (price) price.textContent = amount;
         if (cta) cta.href = href;
         if (stickyCta) stickyCta.href = href;
-        if (stickyMeta) stickyMeta.textContent = money(opt) + ' · ' + opt.getAttribute('data-short');
+        if (stickyMeta) stickyMeta.textContent = amount + ' · ' + opt.getAttribute('data-short') + (cur.qty !== '1' ? ' · ' + cur.qty + ' bottles' : '');
+        // badge: what subscribing saves at the bottle count the subscribe card shows
+        var sub = opts.filter(function (x) { return x.getAttribute('data-plan') === 'subscribe'; })[0];
+        if (save && sub && sub.ohsSizes && sub.ohsSizes.length) {
+          var sq = size(sub).qty;
+          var diff = priceFor('once', sq) - priceFor('subscribe', sq);
+          if (diff > 0) {
+            save.textContent = 'Save ' + fmt(diff).replace('.00', '') + (sq === '1' ? ' / month' : ' every ' + sq + ' months');
+            save.hidden = false;
+          } else save.hidden = true;
+        }
       }
       function choose(opt, focus) {
         opts.forEach(function (o) {
@@ -65,6 +153,8 @@
       opts.forEach(function (o, i) {
         o.addEventListener('click', function () { choose(o); });
         o.addEventListener('keydown', function (e) {
+          if (e.target !== o) return;
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(o); return; }
           var step = (e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : (e.key === 'ArrowUp' || e.key === 'ArrowLeft') ? -1 : 0;
           if (!step) return;
           e.preventDefault();
@@ -278,50 +368,83 @@
     all('[data-ohs~="ftr"]').forEach(function (s) { s.setAttribute('role', 'contentinfo'); });
   }
 
-  /* 9 · Checkout page: honour ?plan=subscribe|once from the lander's plan picker.
-         Sets ClickFunnels' native price dropdown (select[name="variant_price"]) to the
-         product's recurring or one-time price, found in the product data ClickFunnels prints
-         next to its product card (option text as a fallback).
+  /* 9 · Checkout page: honour ?plan=subscribe|once&bottles=1|3|5 from the lander's plan picker.
+         bottles picks the product card: the one whose name holds that number of bottles
+         ("NanoBlue - 3 Bottles"); a name without a number counts as 1 bottle. With no match
+         (or no bottles in the link) the selected card is kept. The card is clicked (ClickFunnels
+         then re-renders it), then its native price dropdown (select[name="variant_price"]) is set
+         to the product's recurring or one-time price, found in the product data ClickFunnels
+         prints next to its product card (option text as a fallback).
          ClickFunnels keeps the chosen price in its own cart (Checkout.computed.checkoutCart) and
          only updates it from a change event on that dropdown, once its handlers are attached.
          Setting the dropdown earlier shows the right plan while the cart keeps the old price
          (the order summary and the charge follow the cart), so the change is re-sent until the
-         cart holds the wanted price. Stops for good as soon as the shopper picks a plan by hand. */
+         cart holds the wanted price. Stops for good as soon as the shopper picks a product or
+         plan by hand. */
   function initCheckoutPlan() {
-    var plan = new URLSearchParams(location.search).get('plan');
+    var q = new URLSearchParams(location.search);
+    var plan = q.get('plan');
     if (plan !== 'subscribe' && plan !== 'once') return;
     if (d.querySelector('[data-ohs-plan-native]')) return;   // store page: its own picker handles this
     var root = d.querySelector('[data-page-element="Checkout/V2"]');
     if (!root) return;
     var wantSub = plan === 'subscribe';
+    var wantBottles = parseInt(q.get('bottles'), 10) || 0;   // 0 = keep the selected product
     var userPicked = false;
     // capture phase: ClickFunnels stops the event on the dropdown itself
     root.addEventListener('change', function (e) {
       if (e.isTrusted && e.target.name === 'variant_price') userPicked = true;
+    }, true);
+    root.addEventListener('click', function (e) {
+      if (e.isTrusted && e.target.closest && e.target.closest('[data-page-element="CheckoutProductCard/V2"]')) userPicked = true;
     }, true);
     function cartHas(priceId) {
       try {
         return window.Checkout.computed.checkoutCart.get().items.some(function (i) { return String(i.price_id) === priceId; });
       } catch (e) { return false; }   // cart not readable: keep re-sending until the timer ends
     }
+    function cardData(card) {
+      var json = card && card.parentElement.querySelector('script[type="application/json"]');
+      try { return JSON.parse(json.textContent); } catch (e) { return null; }
+    }
+    function bottlesOf(card) {
+      var data = cardData(card);
+      var name = (data && ((data.variant && data.variant.name) || (data.product && data.product.name))) ||
+        ((card.querySelector('.elProductCardInfoName') || card).textContent);
+      var m = /(\d+)\s*(?:x\s*)?bottles?/i.exec(name || '');
+      return m ? parseInt(m[1], 10) : 1;
+    }
+    function cards() {
+      var list = all('[data-page-element="CheckoutProductCard/V2"]', root);
+      var shown = list.filter(function (c) { return c.offsetParent !== null; });
+      return shown.length ? shown : list;
+    }
     function apply() {
       if (userPicked) return;
-      all('select[name="variant_price"]', root).forEach(function (s) {
-        var want = null;
-        var card = s.closest('[data-page-element="CheckoutProductCard/V2"]');
-        var json = card && card.parentElement.querySelector('script[type="application/json"]');
-        try {
-          var data = JSON.parse(json.textContent);
-          var v = data.variant || data.product.default_variant;
-          v.prices.forEach(function (p) { if (want === null && !!p.is_recurring === wantSub) want = String(p.id); });
-        } catch (e) {}
-        if (want === null) {
-          Array.prototype.forEach.call(s.options, function (o) { if (want === null && /subscri|recurr|every/i.test(o.text) === wantSub) want = o.value; });
-        }
-        if (want === null || (s.value === want && cartHas(want))) return;
-        s.value = want;
-        s.dispatchEvent(new Event('change', { bubbles: true }));
-      });
+      var list = cards();
+      var card = null;
+      if (wantBottles) list.forEach(function (c) { if (!card && bottlesOf(c) === wantBottles) card = c; });
+      if (!card) card = list.filter(function (c) { return c.classList.contains('elProductSelected'); })[0] || (list.length === 1 ? list[0] : null);
+      if (!card) return;
+      if (!card.classList.contains('elProductSelected') && card.getAttribute('data-select-type') !== 'multiple') {
+        card.click();          // ClickFunnels re-renders the card; the price is set on the next pass
+        setTimeout(apply, 150);
+        return;
+      }
+      var s = card.querySelector('select[name="variant_price"]');
+      if (!s) return;
+      var want = null;
+      try {
+        var data = cardData(card);
+        var v = data.variant || data.product.default_variant;
+        v.prices.forEach(function (p) { if (want === null && !!p.is_recurring === wantSub) want = String(p.id); });
+      } catch (e) {}
+      if (want === null) {
+        Array.prototype.forEach.call(s.options, function (o) { if (want === null && /subscri|recurr|every|month|\//i.test(o.text) === wantSub) want = o.value; });
+      }
+      if (want === null || (s.value === want && cartHas(want))) return;
+      s.value = want;
+      s.dispatchEvent(new Event('change', { bubbles: true }));
     }
     apply();
     var n = 0;
