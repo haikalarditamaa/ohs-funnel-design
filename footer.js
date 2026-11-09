@@ -566,6 +566,206 @@
     });
   }
 
+  /* 12 · Checkout order summary. A native Paragraph tagged order-summary (in its own column next
+          to the Checkout element) becomes a summary card of what ClickFunnels will charge: it
+          reads ClickFunnels' cart (Checkout.computed.checkoutCart) and the product data printed
+          next to each product card, and re-draws whenever the cart changes, so it follows both
+          the lander's choice (?plan=…&bottles=…) and any change made on the checkout itself.
+          Desktop: the column sticks while the form scrolls. Phones: the column moves above the
+          form and the card folds into a one-line "Order summary · $80.00" bar.
+          Optional Custom Attributes on the Paragraph: data-title (product name to show, e.g.
+          Optimal NanoBlue), data-image (fallback image URL), data-once-pill (tag on one-time
+          purchases, e.g. HSA / FSA eligible), data-top (sticky offset in px, default 104). */
+  var SUM_CSS =
+    '[data-ohs~="order-summary"]{margin:0!important}' +
+    '[data-ohs~="order-summary"]>.elParagraph{display:none!important}' +
+    '.ohs-sum{border:1px solid var(--ohs-line,#dedad3);border-radius:20px;background:#fff;overflow:hidden;font-family:inherit;color:var(--ohs-text,#3a4458);text-align:left}' +
+    '.ohs-sum__head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:var(--ohs-sand,#f5f4f2)}' +
+    '.ohs-sum__toggle{all:unset;display:flex;align-items:center;gap:10px;flex:1;cursor:default;font-size:18px;line-height:24px;font-weight:700;color:var(--ohs-ink,#1f2d4a)}' +
+    '.ohs-sum__toggle:focus-visible{outline:2px solid var(--ohs-green,#108474);outline-offset:4px;border-radius:4px}' +
+    '.ohs-sum__mini{display:none;margin-left:auto;font-weight:800}' +
+    '.ohs-sum__change{font-size:14px;line-height:20px;font-weight:600;color:var(--ohs-green,#108474)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}' +
+    '.ohs-sum__item{display:grid;grid-template-columns:72px 1fr auto;gap:16px;align-items:center;padding:20px}' +
+    '.ohs-sum__item+.ohs-sum__item{border-top:1px solid var(--ohs-line,#dedad3)}' +
+    '.ohs-sum__img{position:relative;width:72px;height:72px;border-radius:12px;background:var(--ohs-sand,#f5f4f2)}' +
+    '.ohs-sum__img img{display:block;width:100%;height:100%;object-fit:contain;border-radius:12px}' +
+    '.ohs-sum__qty{position:absolute;top:-8px;right:-8px;min-width:24px;height:24px;padding:0 7px;box-sizing:border-box;border-radius:999px;background:var(--ohs-ink,#1f2d4a);color:#fff;font-size:12px;line-height:24px;font-weight:700;text-align:center}' +
+    '.ohs-sum__name{font-size:16px;line-height:22px;font-weight:700;color:var(--ohs-ink,#1f2d4a)}' +
+    '.ohs-sum__plan{margin-top:2px;font-size:14px;line-height:20px;color:var(--ohs-muted,#5b6577)}' +
+    '.ohs-sum__pill{display:inline-flex;margin-top:8px;padding:2px 10px;border-radius:999px;background:var(--ohs-green-50,#eef6f4);color:var(--ohs-green-700,#0b5f54);font-size:11px;line-height:18px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}' +
+    '.ohs-sum__price{text-align:right;font-size:16px;line-height:22px;font-weight:700;color:var(--ohs-ink,#1f2d4a);white-space:nowrap}' +
+    '.ohs-sum__price s{display:block;font-size:13px;font-weight:400;color:var(--ohs-muted,#5b6577)}' +
+    '.ohs-sum__rows{margin:0;padding:16px 20px;border-top:1px solid var(--ohs-line,#dedad3);display:grid;gap:8px}' +
+    '.ohs-sum__row{display:flex;justify-content:space-between;gap:16px;font-size:14px;line-height:20px}' +
+    '.ohs-sum__row dt{color:var(--ohs-muted,#5b6577)}.ohs-sum__row dd{margin:0;color:var(--ohs-ink,#1f2d4a);font-weight:500;text-align:right}' +
+    '.ohs-sum__row--save dt,.ohs-sum__row--save dd{color:var(--ohs-green-700,#0b5f54);font-weight:600}' +
+    '.ohs-sum__total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 20px;border-top:1px solid var(--ohs-line,#dedad3);font-weight:600;color:var(--ohs-ink,#1f2d4a)}' +
+    '.ohs-sum__total strong{font-size:26px;line-height:30px;font-weight:800}' +
+    '.ohs-sum__renew{margin:0;padding:12px 20px;font-size:13px;line-height:18px;color:var(--ohs-green-700,#0b5f54);background:var(--ohs-green-50,#eef6f4)}' +
+    '.ohs-sum__empty{margin:0;padding:20px;font-size:14px;color:var(--ohs-muted,#5b6577)}' +
+    '.ohs-sum__assure{display:grid;gap:6px;margin:0;padding:14px 20px 18px;list-style:none;font-size:13px;line-height:18px;color:var(--ohs-muted,#5b6577);border-top:1px solid var(--ohs-line,#dedad3)}' +
+    '.ohs-sum__assure li::before{content:"\\2713";color:var(--ohs-green,#108474);font-weight:700;margin-right:8px}' +
+    '@media (min-width:768px){[data-ohs-sumcol]{position:sticky;top:var(--ohs-sum-top,104px);align-self:flex-start}}' +
+    '@media (max-width:767px){' +
+      '[data-ohs-sumcol]{order:-1;margin-bottom:24px}' +
+      '.ohs-sum__toggle{cursor:pointer}' +
+      '.ohs-sum__toggle::after{content:"";width:7px;height:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg) translateY(-3px);transition:transform .2s;order:1}' +
+      '.ohs-sum.is-open .ohs-sum__toggle::after{transform:rotate(-135deg) translateY(-1px)}' +
+      '.ohs-sum__mini{display:inline;order:2}' +
+      '.ohs-sum__change{display:none}' +
+      '.ohs-sum:not(.is-open) .ohs-sum__body{display:none}' +
+      '.ohs-sum__item{grid-template-columns:60px 1fr}.ohs-sum__img{width:60px;height:60px}' +
+      '.ohs-sum__price{grid-column:2;text-align:left}.ohs-sum__price s{display:inline;margin-left:6px}' +
+    '}';
+  function initOrderSummary() {
+    var slot = d.querySelector('[data-ohs~="order-summary"]');
+    var root = d.querySelector('[data-page-element="Checkout/V2"]');
+    if (!slot || !root || slot.querySelector('.ohs-sum')) return;
+    addCss('ohs-sum-css', SUM_CSS);
+    var col = slot.closest('[data-page-element^="ColContainer"]');
+    if (col) col.setAttribute('data-ohs-sumcol', '');
+    var top = parseInt(slot.getAttribute('data-top'), 10);
+    if (top >= 0 && col) col.style.setProperty('--ohs-sum-top', top + 'px');
+    var phone = window.matchMedia ? matchMedia('(max-width: 767px)') : { matches: false };
+
+    function el(tag, cls, text) { var e = d.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+    function money(c) { return '$' + (c / 100).toFixed(2); }
+    function products() {
+      // every product card's data, keyed by price id (ClickFunnels prints some cards twice)
+      var map = {};
+      all('[data-page-element="CheckoutProductCard/V2"]', root).forEach(function (card) {
+        var json = card.parentElement.querySelector('script[type="application/json"]');
+        var data; try { data = JSON.parse(json.textContent); } catch (e) { return; }
+        var v = data.variant || (data.product && data.product.default_variant);
+        if (!v || !v.prices) return;
+        var name = (data.product && data.product.name) || v.name || '';
+        var once = v.prices.filter(function (p) { return !p.is_recurring; })[0];
+        var m = /(\d+)\s*(?:x\s*)?bottles?/i.exec(name);
+        var img = v.image || (data.product && data.product.image) || '';
+        if (typeof img === 'object') img = img.url || img.src || '';
+        v.prices.forEach(function (p) {
+          if (!map[p.id]) map[p.id] = { name: name, bottles: m ? +m[1] : 1, price: p, once: once, img: img, card: card };
+        });
+      });
+      return map;
+    }
+    function every(p, bottles) {
+      var m = /\/\s*(\d+)?\s*(day|week|month|year)s?/i.exec(p.name || '');
+      var n = m ? +(m[1] || 1) : bottles, unit = m ? m[2].toLowerCase() : 'month';
+      return n > 1 ? n + ' ' + unit + 's' : unit;
+    }
+
+    var box = el('div', 'ohs-sum');
+    var head = el('div', 'ohs-sum__head');
+    var toggle = el('button', 'ohs-sum__toggle');
+    toggle.type = 'button';
+    toggle.appendChild(el('span', '', 'Order summary'));
+    var mini = el('span', 'ohs-sum__mini');
+    toggle.appendChild(mini);
+    var change = el('a', 'ohs-sum__change', 'Change');
+    change.href = '#';
+    head.appendChild(toggle);
+    head.appendChild(change);
+    var body = el('div', 'ohs-sum__body');
+    body.id = 'ohs-sum-body';
+    body.setAttribute('aria-live', 'polite');
+    box.appendChild(head);
+    box.appendChild(body);
+    slot.appendChild(box);
+
+    function setPhone() {
+      if (phone.matches) {
+        toggle.removeAttribute('tabindex');
+        toggle.setAttribute('aria-controls', body.id);
+        toggle.setAttribute('aria-expanded', box.classList.contains('is-open') ? 'true' : 'false');
+      } else {
+        box.classList.add('is-open');
+        toggle.tabIndex = -1;            // nothing to toggle on desktop
+        toggle.removeAttribute('aria-expanded');
+        toggle.removeAttribute('aria-controls');
+      }
+    }
+    toggle.addEventListener('click', function () {
+      if (!phone.matches) return;
+      box.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', box.classList.contains('is-open') ? 'true' : 'false');
+    });
+    if (phone.addEventListener) phone.addEventListener('change', setPhone);
+    setPhone();
+    change.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = all('[data-page-element="CheckoutProductSelect/V2"]', root).filter(function (x) { return x.offsetParent !== null; })[0] || root;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    var last = '';
+    function render() {
+      var items = [];
+      try { items = window.Checkout.computed.checkoutCart.get().items || []; } catch (e) {}
+      var map = products();
+      var lines = items.map(function (i) { var p = map[String(i.price_id)]; return p ? { p: p, qty: i.quantity || 1 } : null; }).filter(Boolean);
+      var key = JSON.stringify(lines.map(function (l) { return [l.p.price.id, l.qty]; }));
+      if (key === last && body.firstChild) return;
+      last = key;
+      body.textContent = '';
+      if (!lines.length) {
+        mini.textContent = '';
+        body.appendChild(el('p', 'ohs-sum__empty', 'Choose a product below to see your order.'));
+        return;
+      }
+      var full = 0, total = 0, renew = [];
+      lines.forEach(function (l) {
+        var p = l.p, pr = p.price, sub = !!pr.is_recurring, n = p.bottles;
+        var cents = pr.price_cents * l.qty;
+        var was = (sub && p.once ? p.once.price_cents : pr.price_cents) * l.qty;
+        full += was; total += cents;
+        var row = el('div', 'ohs-sum__item');
+        var pic = el('div', 'ohs-sum__img');
+        var src = p.img || slot.getAttribute('data-image') || (function () { for (var k in map) if (map[k].img) return map[k].img; return ''; })();
+        if (src) { var im = el('img'); im.src = src; im.alt = ''; pic.appendChild(im); }
+        pic.appendChild(el('span', 'ohs-sum__qty', String(n * l.qty)));
+        var info = el('div');
+        var title = slot.getAttribute('data-title') || p.name.replace(/\s*[-–·]\s*\d+\s*(?:x\s*)?bottles?$/i, '');
+        info.appendChild(el('div', 'ohs-sum__name', title + ' · ' + (n * l.qty) + (n * l.qty > 1 ? ' bottles' : ' bottle')));
+        var per = n * l.qty > 1 ? ' · ' + money(cents / (n * l.qty)) + ' per bottle' : '';
+        info.appendChild(el('div', 'ohs-sum__plan', (sub ? 'Ships every ' + every(pr, n) : 'One-time purchase') + per));
+        var pill = sub
+          ? (was > cents ? 'Subscribe & Save ' + Math.round((1 - cents / was) * 100) + '%' : 'Subscription')
+          : slot.getAttribute('data-once-pill');
+        if (pill) info.appendChild(el('span', 'ohs-sum__pill', pill));
+        var price = el('div', 'ohs-sum__price', money(cents));
+        if (was > cents) price.appendChild(el('s', '', money(was)));
+        row.appendChild(pic); row.appendChild(info); row.appendChild(price);
+        body.appendChild(row);
+        if (sub) renew.push(money(cents) + ' every ' + every(pr, n));
+      });
+      var rows = el('dl', 'ohs-sum__rows');
+      function addRow(k, v, cls) { var r = el('div', 'ohs-sum__row' + (cls ? ' ' + cls : '')); r.appendChild(el('dt', '', k)); r.appendChild(el('dd', '', v)); rows.appendChild(r); }
+      addRow('Subtotal', money(full));
+      if (full > total) addRow('Subscribe & Save', '−' + money(full - total), 'ohs-sum__row--save');
+      addRow('Shipping', 'Calculated after address');
+      body.appendChild(rows);
+      var tot = el('div', 'ohs-sum__total');
+      tot.appendChild(el('span', '', 'Due today'));
+      tot.appendChild(el('strong', '', money(total)));
+      body.appendChild(tot);
+      mini.textContent = money(total);
+      if (renew.length) body.appendChild(el('p', 'ohs-sum__renew', 'Then ' + renew.join(' + ') + '. Skip, pause or cancel anytime.'));
+      var ul = el('ul', 'ohs-sum__assure');
+      ['Secure, encrypted checkout', 'Usually ready to ship in 24 hrs', '30-day money-back guarantee'].forEach(function (t) { ul.appendChild(el('li', '', t)); });
+      body.appendChild(ul);
+    }
+    render();
+    // the cart is a nanostores atom: redraw on every change (falls back to polling if it isn't there yet)
+    var tries = 0;
+    (function hook() {
+      var cart = window.Checkout && window.Checkout.computed && window.Checkout.computed.checkoutCart;
+      if (cart && cart.subscribe) { cart.subscribe(render); return; }
+      render();
+      if (++tries < 40) setTimeout(hook, 250);
+    })();
+  }
+
   addCss('ohs-fix-css', FIX_CSS);
-  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); initCheckoutPlan(); initStickyHeader(); initCarousel(); });
+  ready(function () { initPlan(); initGallery(); initFaq(); initReveal(); initFooter(); initNativePlan(); initChrome(); initCheckoutPlan(); initStickyHeader(); initCarousel(); initOrderSummary(); });
 })();
