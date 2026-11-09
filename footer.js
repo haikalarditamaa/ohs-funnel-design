@@ -579,6 +579,9 @@
   var SUM_CSS =
     '[data-ohs~="order-summary"]{margin:0!important}' +
     '[data-ohs~="order-summary"]>.elParagraph{display:none!important}' +
+    /* ClickFunnels' clearfix ::before/::after on divs would become extra flex / grid items */
+    '.ohs-sum div::before,.ohs-sum div::after,.ohs-sum dl::before,.ohs-sum dl::after{content:none!important;display:none!important}' +
+    '.ohs-sum dt,.ohs-sum dd,.ohs-sum__total>*,.ohs-sum__item>*{margin:0!important}' +
     '.ohs-sum{border:1px solid var(--ohs-line,#dedad3);border-radius:20px;background:#fff;overflow:hidden;font-family:inherit;color:var(--ohs-text,#3a4458);text-align:left}' +
     '.ohs-sum__head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:var(--ohs-sand,#f5f4f2)}' +
     '.ohs-sum__toggle{all:unset;display:flex;align-items:center;gap:10px;flex:1;cursor:default;font-size:18px;line-height:24px;font-weight:700;color:var(--ohs-ink,#1f2d4a)}' +
@@ -595,8 +598,8 @@
     '.ohs-sum__pill{display:inline-flex;margin-top:8px;padding:2px 10px;border-radius:999px;background:var(--ohs-green-50,#eef6f4);color:var(--ohs-green-700,#0b5f54);font-size:11px;line-height:18px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}' +
     '.ohs-sum__price{text-align:right;font-size:16px;line-height:22px;font-weight:700;color:var(--ohs-ink,#1f2d4a);white-space:nowrap}' +
     '.ohs-sum__price s{display:block;font-size:13px;font-weight:400;color:var(--ohs-muted,#5b6577)}' +
-    '.ohs-sum__rows{margin:0;padding:16px 20px;border-top:1px solid var(--ohs-line,#dedad3);display:grid;gap:8px}' +
-    '.ohs-sum__row{display:flex;justify-content:space-between;gap:16px;font-size:14px;line-height:20px}' +
+    '.ohs-sum__rows{justify-items:stretch;margin:0;padding:16px 20px;border-top:1px solid var(--ohs-line,#dedad3);display:grid;gap:8px}' +
+    '.ohs-sum__row{display:flex;justify-content:space-between;gap:16px;width:100%;box-sizing:border-box;font-size:14px;line-height:20px}' +
     '.ohs-sum__row dt{color:var(--ohs-muted,#5b6577)}.ohs-sum__row dd{margin:0;color:var(--ohs-ink,#1f2d4a);font-weight:500;text-align:right}' +
     '.ohs-sum__row--save dt,.ohs-sum__row--save dd{color:var(--ohs-green-700,#0b5f54);font-weight:600}' +
     '.ohs-sum__total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 20px;border-top:1px solid var(--ohs-line,#dedad3);font-weight:600;color:var(--ohs-ink,#1f2d4a)}' +
@@ -604,6 +607,7 @@
     '.ohs-sum__renew{margin:0;padding:12px 20px;font-size:13px;line-height:18px;color:var(--ohs-green-700,#0b5f54);background:var(--ohs-green-50,#eef6f4)}' +
     '.ohs-sum__empty{margin:0;padding:20px;font-size:14px;color:var(--ohs-muted,#5b6577)}' +
     '.ohs-sum__assure{display:grid;gap:6px;margin:0;padding:14px 20px 18px;list-style:none;font-size:13px;line-height:18px;color:var(--ohs-muted,#5b6577);border-top:1px solid var(--ohs-line,#dedad3)}' +
+    '.ohs-sum__assure li{display:block;width:100%;text-align:left}' +
     '.ohs-sum__assure li::before{content:"\\2713";color:var(--ohs-green,#108474);font-weight:700;margin-right:8px}' +
     '@media (min-width:768px){[data-ohs-sumcol]{position:sticky;top:var(--ohs-sum-top,104px);align-self:flex-start}}' +
     '@media (max-width:767px){' +
