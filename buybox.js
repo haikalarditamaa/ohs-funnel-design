@@ -14,6 +14,8 @@
      data-unit         (optional) regular price of 1 bottle (struck-through price)    default 40
      data-default      (optional) bundle selected on load: 1, 3 or 5                  default 3
      data-plan         (optional) plan selected on load: subscribe or once            default subscribe
+     data-slides       (optional) product image shown per bundle "bottles|image#;…"  default "1|1;3|5;5|6"
+                       (image numbers count from 1 in the ClickFunnels Product Image Carousel; "" turns it off)
 
    "Add to cart" opens  <checkout>?plan=subscribe|once&bottles=1|3|5  (+ utm_* / ad click ids).
    footer.js on the checkout selects the product whose name holds that bottle count
@@ -116,19 +118,38 @@
         o.tabIndex = on ? 0 : -1;
       });
       if (focus) opt.focus();
-      onChoose();
+      onChoose(opt, user);
     }
+    var user = false;   // true only while the shopper's own click / key is being handled
+    function pick(opt, focus) { user = true; try { choose(opt, focus); } finally { user = false; } }
     opts.forEach(function (o, i) {
-      o.addEventListener('click', function () { choose(o); });
+      o.addEventListener('click', function () { pick(o); });
       o.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(o); return; }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(o); return; }
         var step = (e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : (e.key === 'ArrowUp' || e.key === 'ArrowLeft') ? -1 : 0;
         if (!step) return;
         e.preventDefault();
-        choose(opts[(i + step + opts.length) % opts.length], true);
+        pick(opts[(i + step + opts.length) % opts.length], true);
       });
     });
     return choose;
+  }
+
+  /* Product Image Carousel (ClickFunnels CheckoutProductImageCarousel/V1, a Swiper slider with
+     thumbnails): show image n (1-based). Its thumbnails follow the main slider by themselves. */
+  function showImage(n) {
+    var car = d.querySelector('[data-page-element="CheckoutProductImageCarousel/V1"]');
+    if (!car || !(n > 0)) return;
+    var main = car.querySelector('.slider-main') || car.querySelector('.swiper');
+    var sw = main && main.swiper;
+    if (sw && !sw.destroyed) {
+      if (n > main.querySelectorAll('.swiper-slide:not(.swiper-slide-duplicate)').length) return;
+      if (sw.params.loop && sw.slideToLoop) sw.slideToLoop(n - 1); else sw.slideTo(n - 1);
+      return;
+    }
+    // slider not ready yet: click the matching thumbnail instead
+    var th = car.querySelector('.slider-nav [data-image-position="' + (n - 1) + '"]');
+    if (th) th.click();
   }
 
   function build(slot, index) {
@@ -147,6 +168,8 @@
     var defPlan = hasSub && (slot.getAttribute('data-plan') || 'subscribe') !== 'once' ? 'subscribe' : 'once';
     var subPct = hasSub ? Math.round((1 - price.subscribe[1] / price.once[1]) * 100) : 0;
     var uid = 'ohs-bb' + index;
+    var slidesAttr = slot.getAttribute('data-slides');
+    var slides = parsePrices(slidesAttr == null ? '1|1;3|5;5|6' : slidesAttr);
 
     var html = '<div class="ohs ohs-bb" data-ohs-bb>' +
       '<div class="ohs-bb__head"><span class="ohs-bb__label" id="' + uid + '-h">Choose your bundle</span><span class="ohs-bb__badge" data-bb-saved hidden></span></div>';
@@ -267,7 +290,10 @@
     }
 
     var choosePlan = planOpts.length ? radioGroup(planOpts, sync) : null;
-    var chooseBundle = radioGroup(bundleOpts, sync);
+    var chooseBundle = radioGroup(bundleOpts, function (opt, user) {
+      sync();
+      if (user) showImage(slides[parseInt(opt.getAttribute('data-qty'), 10)]);   // only when the shopper picks, not on load
+    });
     // initial state without firing sync twice on half-set groups
     planOpts.forEach(function (o) { var on = o.getAttribute('data-plan') === defPlan; o.classList.toggle('is-selected', on); o.setAttribute('aria-checked', on ? 'true' : 'false'); o.tabIndex = on ? 0 : -1; });
     chooseBundle(bundleOpts.filter(function (o) { return o.getAttribute('data-qty') === String(defQty); })[0] || bundleOpts[0]);
