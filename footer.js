@@ -19,7 +19,7 @@
      page has a native element tagged "plan-slot" instead of the Custom JS/HTML snippet, so the
      picker doesn't depend on ClickFunnels keeping a Custom HTML block. The slot's own Custom
      Attribute "data-checkout" carries the checkout URL. */
-  var PLAN_HTML = "<div class=\"ohs ohs-plan\" data-ohs-plan data-checkout=\"CHECKOUT_URL\"><div class=\"ohs-plan__head\"><span class=\"ohs-plan__label\">Choose how you buy</span><span class=\"ohs-badge ohs-badge--green\" data-ohs-save>Save &#36;4 / month</span></div><div class=\"ohs-plan__options\"><div class=\"ohs-plan__opt is-selected\" data-plan=\"subscribe\" data-price=\"36.00\" data-short=\"Subscribe\" data-sizes=\"1|36.00|Every month · 1 bottle;3|72.00|Every 3 months · 3 bottles;5|108.00|Every 5 months · 5 bottles\" data-size-label=\"How often\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">Subscribe &amp; Save 10%</span><span class=\"ohs-plan__price\">&#36;36.00</span><span class=\"ohs-plan__detail\" data-detail=\"Skip, pause or cancel anytime\" data-detail-1=\"Delivered every 30 days · Skip, pause or cancel anytime\">Delivered every 30 days · Skip, pause or cancel anytime</span></span></div><div class=\"ohs-plan__opt\" data-plan=\"once\" data-price=\"40.00\" data-short=\"One-time\" data-sizes=\"1|40.00|1 bottle;3|80.00|Buy 3 bottles;5|120.00|Buy 5 bottles\" data-size-label=\"How many bottles\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">One-time purchase</span><span class=\"ohs-plan__price\">&#36;40.00</span><span class=\"ohs-plan__detail\" data-detail=\"Paying with HSA/FSA via TrueMed? Choose this option.\">Paying with HSA/FSA via TrueMed? Choose this option.</span></span></div></div><a class=\"ohs-btn ohs-btn--block ohs-plan__cta\" href=\"CHECKOUT_URL?plan=subscribe&amp;bottles=1\">Add to cart · <span data-ohs-price>&#36;36.00</span></a><ul class=\"ohs-plan__micro\"><li class=\"ohs-i ohs-i--lock\">Secure checkout</li><li class=\"ohs-i ohs-i--truck\">Usually ready in 24 hrs</li><li class=\"ohs-i ohs-i--shield\">30-day money-back guarantee</li></ul><div class=\"ohs ohs-sticky\" data-ohs-sticky><img class=\"ohs-sticky__img\" src=\"https://www.optimalhealthsystems.com/cdn/shop/files/OHS-NanoBlue1.png?width=120\" alt=\"\" width=\"48\" height=\"48\"><span class=\"ohs-sticky__text\"><span class=\"ohs-sticky__name\">Optimal NanoBlue</span><span class=\"ohs-sticky__meta\" data-ohs-sticky-meta>&#36;36.00 · Subscribe</span></span><a class=\"ohs-btn ohs-btn--plain\" data-ohs-sticky-cta href=\"CHECKOUT_URL?plan=subscribe&amp;bottles=1\">Add to cart</a></div></div>";
+  var PLAN_HTML = "<div class=\"ohs ohs-plan\" data-ohs-plan data-checkout=\"CHECKOUT_URL\"><div class=\"ohs-plan__head\"><span class=\"ohs-plan__label\">Choose how you buy</span><span class=\"ohs-badge ohs-badge--green\" data-ohs-save>Save 10%</span></div><div class=\"ohs-plan__qty\" data-qty=\"1|1 Bottle / Monthly|month;3|3 Bottles / Every 3 Months|3 months;5|5 Bottles / Every 5 Months|5 months\" data-label=\"Quantity\"></div><div class=\"ohs-plan__options\"><div class=\"ohs-plan__opt\" data-plan=\"once\" data-short=\"One-time\" data-prices=\"1|40.00;3|80.00;5|120.00\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">One-time purchase</span><span class=\"ohs-plan__price\">&#36;40.00</span><span class=\"ohs-plan__detail\" data-detail=\"Paying with HSA/FSA via TrueMed? Choose this option.\">Paying with HSA/FSA via TrueMed? Choose this option.</span></span></div><div class=\"ohs-plan__opt is-selected\" data-plan=\"subscribe\" data-short=\"Subscribe\" data-prices=\"1|36.00;3|72.00;5|108.00\"><span class=\"ohs-plan__radio\"></span><span class=\"ohs-plan__body\"><span class=\"ohs-plan__title\">Ship every <span data-ohs-period>month</span></span><span class=\"ohs-plan__price\">&#36;36.00</span><span class=\"ohs-plan__detail\" data-detail=\"Subscribe &amp; save 10% · Skip, pause or cancel anytime\">Subscribe &amp; save 10% · Skip, pause or cancel anytime</span></span></div></div><a class=\"ohs-btn ohs-btn--block ohs-plan__cta\" href=\"CHECKOUT_URL?plan=subscribe&amp;bottles=1\">Add to cart · <span data-ohs-price>&#36;36.00</span></a><ul class=\"ohs-plan__micro\"><li class=\"ohs-i ohs-i--lock\">Secure checkout</li><li class=\"ohs-i ohs-i--truck\">Usually ready in 24 hrs</li><li class=\"ohs-i ohs-i--shield\">30-day money-back guarantee</li></ul><div class=\"ohs ohs-sticky\" data-ohs-sticky><img class=\"ohs-sticky__img\" src=\"https://www.optimalhealthsystems.com/cdn/shop/files/OHS-NanoBlue1.png?width=120\" alt=\"\" width=\"48\" height=\"48\"><span class=\"ohs-sticky__text\"><span class=\"ohs-sticky__name\">Optimal NanoBlue</span><span class=\"ohs-sticky__meta\" data-ohs-sticky-meta>&#36;36.00 · Subscribe</span></span><a class=\"ohs-btn ohs-btn--plain\" data-ohs-sticky-cta href=\"CHECKOUT_URL?plan=subscribe&amp;bottles=1\">Add to cart</a></div></div>";
   function initPlanSlots() {
     all('[data-ohs~="plan-slot"]').forEach(function (slot) {
       if (slot.querySelector('[data-ohs-plan]') || d.querySelector('[data-ohs-plan]')) return;
@@ -27,26 +27,34 @@
       slot.insertAdjacentHTML('beforeend', PLAN_HTML.split('CHECKOUT_URL').join(url));
     });
   }
-  /* Bottle dropdowns: each plan card lists its choices in data-sizes as
-     "bottles|price|label;…" (one per ClickFunnels product: NanoBlue, NanoBlue - 3 Bottles, …).
-     The <select> is built here, not in the snippet, because ClickFunnels drops custom HTML
-     that contains form inputs. */
+  /* Quantity dropdown + two radio cards (One-time purchase / Ship every <period>).
+     .ohs-plan__qty lists the choices in data-qty as "bottles|label|period;…" and each card
+     lists its prices in data-prices as "bottles|price;…" (one ClickFunnels product per bottle
+     count: NanoBlue, NanoBlue - 3 Bottles, …). The <select> is built here, not in the snippet,
+     because ClickFunnels drops custom HTML that contains form inputs. */
   var PLAN_CSS =
-    '.ohs-plan__opt{align-items:flex-start}' +
-    '.ohs-plan__size{grid-column:1/-1;position:relative;margin:8px 0 4px}' +
-    '.ohs-plan__size select{display:block;width:100%;height:44px;margin:0;padding:0 40px 0 14px;border:1px solid var(--ohs-line,#d9dee5);border-radius:12px;' +
-      'background:#fff;color:var(--ohs-ink,#1f2d4a);font:inherit;font-size:15px;font-weight:500;line-height:20px;cursor:pointer;-webkit-appearance:none;appearance:none;box-shadow:none}' +
-    '.ohs-plan__size select:hover{border-color:var(--ohs-green-100,#bcd9cb)}' +
-    '.ohs-plan__size select:focus-visible{outline:none;border-color:var(--ohs-green,#2f7a5b);box-shadow:var(--ohs-ring,0 0 0 3px rgba(47,122,91,.25))}' +
-    '.ohs-plan__size::after{content:"";position:absolute;right:16px;top:50%;width:8px;height:8px;margin-top:-6px;border:solid var(--ohs-ink,#1f2d4a);border-width:0 2px 2px 0;transform:rotate(45deg);pointer-events:none}' +
-    '.ohs-plan__opt:not(.is-selected) .ohs-plan__size select{background:#fff;color:var(--ohs-muted,#5b6577)}';
-  function parseSizes(s) {
+    '.ohs-plan__qty{display:grid;gap:6px}' +
+    '.ohs-plan__qty-label{font-size:14px;line-height:20px;font-weight:600;color:var(--ohs-ink,#1f2d4a)}' +
+    '.ohs-plan__select{position:relative}' +
+    '.ohs-plan__select select{display:block;width:100%;height:48px;margin:0;padding:0 44px 0 16px;border:1px solid var(--ohs-line,#d9dee5);border-radius:12px;' +
+      'background:#fff;color:var(--ohs-ink,#1f2d4a);font:inherit;font-size:16px;font-weight:500;line-height:20px;cursor:pointer;-webkit-appearance:none;appearance:none;box-shadow:none}' +
+    '.ohs-plan__select select:hover{border-color:var(--ohs-green-100,#bcd9cb)}' +
+    '.ohs-plan__select select:focus-visible{outline:none;border-color:var(--ohs-green,#2f7a5b);box-shadow:var(--ohs-ring,0 0 0 3px rgba(47,122,91,.25))}' +
+    '.ohs-plan__select::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;margin-top:-6px;border:solid var(--ohs-ink,#1f2d4a);border-width:0 2px 2px 0;transform:rotate(45deg);pointer-events:none}' +
+    '.ohs-plan__price s{margin-left:6px;font-weight:400;color:var(--ohs-muted,#5b6577)}' +
+    '.ohs-plan__micro{justify-content:center}' +
+    '[data-ohs~="price"] s{margin-right:8px;color:var(--ohs-muted,#5b6577)}';
+  function parseList(s, keys) {
     return (s || '').split(';').map(function (part) {
       var p = part.split('|');
-      return p.length >= 3 ? { qty: p[0].trim(), price: p[1].trim(), label: p.slice(2).join('|').trim() } : null;
+      if (p.length < keys.length) return null;
+      var o = {};
+      keys.forEach(function (k, i) { o[k] = (i === keys.length - 1 ? p.slice(i).join('|') : p[i]).trim(); });
+      return o;
     }).filter(Boolean);
   }
   function fmt(n) { return '$' + (Math.round(n * 100) / 100).toFixed(2); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   function initPlan() {
     initPlanSlots();
@@ -60,85 +68,89 @@
       var stickyMeta = sticky && sticky.querySelector('[data-ohs-sticky-meta]');
       var opts = all('.ohs-plan__opt', box);
       var group = box.querySelector('.ohs-plan__options');
+      var qtyBox = box.querySelector('.ohs-plan__qty');
+      var qtys = parseList(qtyBox && qtyBox.getAttribute('data-qty'), ['qty', 'label', 'period']);
+      // the price Paragraphs under the review stars (data-ohs = price) in the same column
+      var col = box.closest('[data-page-element^="Col"]') || d;
+      var heroPrices = all('[data-ohs~="price"]', col).filter(function (p) { return !box.contains(p); });
       // ClickFunnels drops custom HTML with ids / ARIA roles, so they're added here
       if (!d.getElementById('buy')) box.id = 'buy';
       if (group) { group.setAttribute('role', 'radiogroup'); group.setAttribute('aria-label', 'Choose how you buy'); }
       all('.ohs-plan__radio', box).forEach(function (r) { r.setAttribute('aria-hidden', 'true'); });
-      if (opts.some(function (o) { return o.hasAttribute('data-sizes'); })) addCss('ohs-plan-css', PLAN_CSS);
+      addCss('ohs-plan-css', PLAN_CSS);
 
-      // Build each card's bottle dropdown
-      opts.forEach(function (o, i) {
-        o.setAttribute('role', 'radio');
-        var sizes = parseSizes(o.getAttribute('data-sizes'));
-        o.ohsSizes = sizes;
-        var title = o.querySelector('.ohs-plan__title');
-        if (title) { title.id = title.id || 'ohs-plan-t' + i; o.setAttribute('aria-labelledby', title.id); }
-        if (sizes.length < 2 || o.querySelector('.ohs-plan__size')) return;
+      var sel = null;
+      if (qtyBox && qtys.length && !qtyBox.querySelector('select')) {
+        var lab = d.createElement('label');
+        lab.className = 'ohs-plan__qty-label';
+        lab.htmlFor = 'ohs-plan-qty';
+        lab.textContent = qtyBox.getAttribute('data-label') || 'Quantity';
         var wrap = d.createElement('span');
-        wrap.className = 'ohs-plan__size';
-        var sel = d.createElement('select');
-        sel.setAttribute('aria-label', (o.getAttribute('data-size-label') || 'Bottles') + ' · ' + (title ? title.textContent : ''));
-        sizes.forEach(function (s) {
+        wrap.className = 'ohs-plan__select';
+        sel = d.createElement('select');
+        sel.id = 'ohs-plan-qty';
+        qtys.forEach(function (q) {
           var op = d.createElement('option');
-          op.value = s.qty;
-          op.textContent = s.label + ' · ' + fmt(parseFloat(s.price));
+          op.value = q.qty;
+          op.textContent = q.label;
           sel.appendChild(op);
         });
         wrap.appendChild(sel);
-        var body = o.querySelector('.ohs-plan__body') || o;
-        body.insertBefore(wrap, body.querySelector('.ohs-plan__detail'));
-        o.ohsSelect = sel;
-        // the dropdown sits inside the card: a click on it must not bubble into the card's
-        // keyboard / click handling in a way that steals focus, but it does pick that plan
-        sel.addEventListener('click', function (e) { e.stopPropagation(); if (!o.classList.contains('is-selected')) choose(o); });
-        sel.addEventListener('keydown', function (e) { e.stopPropagation(); });
-        sel.addEventListener('change', function () { choose(o); });
+        qtyBox.appendChild(lab);
+        qtyBox.appendChild(wrap);
+        sel.addEventListener('change', sync);
+      }
+      opts.forEach(function (o, i) {
+        o.setAttribute('role', 'radio');
+        o.ohsPrices = parseList(o.getAttribute('data-prices'), ['qty', 'price']);
+        var title = o.querySelector('.ohs-plan__title');
+        if (title) { title.id = title.id || 'ohs-plan-t' + i; o.setAttribute('aria-labelledby', title.id); }
       });
 
-      function size(o) {
-        var sizes = o.ohsSizes || [];
-        var q = o.ohsSelect ? o.ohsSelect.value : (sizes[0] && sizes[0].qty);
-        for (var i = 0; i < sizes.length; i++) if (sizes[i].qty === q) return sizes[i];
-        return { qty: '1', price: o.getAttribute('data-price'), label: '' };
-      }
-      function priceFor(plan, qty) {
+      function qty() { return sel ? sel.value : '1'; }
+      function qtyInfo() { var q = qty(); return qtys.filter(function (x) { return x.qty === q; })[0] || { qty: q, label: '', period: 'month' }; }
+      function priceOf(plan, q) {
         var o = opts.filter(function (x) { return x.getAttribute('data-plan') === plan; })[0];
-        var s = o && (o.ohsSizes || []).filter(function (x) { return x.qty === qty; })[0];
-        return s ? parseFloat(s.price) : (o && qty === '1' ? parseFloat(o.getAttribute('data-price')) : NaN);
+        var p = o && (o.ohsPrices || []).filter(function (x) { return x.qty === q; })[0];
+        return p ? parseFloat(p.price) : NaN;
       }
       function current() { return box.querySelector('.ohs-plan__opt.is-selected') || opts[0]; }
       function sync() {
         var opt = current();
         if (!opt) return;
+        var q = qty(), info = qtyInfo(), n = parseInt(q, 10) || 1;
+        var once = priceOf('once', q), sub = priceOf('subscribe', q);
+        all('[data-ohs-period]', box).forEach(function (s) { s.textContent = info.period; });
         opts.forEach(function (o) {
-          var s = size(o);
+          var plan = o.getAttribute('data-plan');
+          var amt = priceOf(plan, q);
           var p = o.querySelector('.ohs-plan__price');
-          if (p) p.textContent = fmt(parseFloat(s.price));
+          if (p && !isNaN(amt)) p.innerHTML = esc(fmt(amt)) + (plan === 'subscribe' && once > amt ? '<s>' + esc(fmt(once)) + '</s>' : '');
           var det = o.querySelector('.ohs-plan__detail');
-          if (det && det.hasAttribute('data-detail')) {
-            var q = parseInt(s.qty, 10) || 1;
-            det.textContent = q > 1
-              ? fmt(parseFloat(s.price) / q) + ' per bottle · ' + det.getAttribute('data-detail')
-              : (det.getAttribute('data-detail-1') || det.getAttribute('data-detail'));
-          }
+          if (det && det.hasAttribute('data-detail')) det.textContent = (n > 1 && !isNaN(amt) ? fmt(amt / n) + ' per bottle · ' : '') + det.getAttribute('data-detail');
         });
-        var cur = size(opt);
         var plan = opt.getAttribute('data-plan');
-        var href = checkoutUrl(base, plan, cur.qty);
-        var amount = fmt(parseFloat(cur.price));
-        if (price) price.textContent = amount;
+        var amount = priceOf(plan, q);
+        var href = checkoutUrl(base, plan, q);
+        if (price) price.textContent = fmt(amount);
         if (cta) cta.href = href;
         if (stickyCta) stickyCta.href = href;
-        if (stickyMeta) stickyMeta.textContent = amount + ' · ' + opt.getAttribute('data-short') + (cur.qty !== '1' ? ' · ' + cur.qty + ' bottles' : '');
-        // badge: what subscribing saves at the bottle count the subscribe card shows
-        var sub = opts.filter(function (x) { return x.getAttribute('data-plan') === 'subscribe'; })[0];
-        if (save && sub && sub.ohsSizes && sub.ohsSizes.length) {
-          var sq = size(sub).qty;
-          var diff = priceFor('once', sq) - priceFor('subscribe', sq);
-          if (diff > 0) {
-            save.textContent = 'Save ' + fmt(diff).replace('.00', '') + (sq === '1' ? ' / month' : ' every ' + sq + ' months');
-            save.hidden = false;
-          } else save.hidden = true;
+        if (stickyMeta) stickyMeta.textContent = fmt(amount) + ' · ' + (plan === 'subscribe' ? 'Every ' + info.period : 'One-time') + (n > 1 ? ' · ' + n + ' bottles' : '');
+        if (save) {
+          var diff = once - sub;
+          if (diff > 0) { save.textContent = 'Save ' + fmt(diff).replace('.00', '') + (n === 1 ? ' / month' : ' every ' + info.period); save.hidden = false; }
+          else save.hidden = true;
+        }
+        // hero price under the review stars: big price (+ struck one-time price), then a caption
+        if (heroPrices.length) {
+          var big = '<b>' + esc(fmt(amount)) + '</b>' + (plan === 'subscribe' && once > amount ? '<s>' + esc(fmt(once)) + '</s>' : '');
+          var bottles = n + (n > 1 ? ' bottles' : ' bottle');
+          var cap = plan === 'subscribe'
+            ? bottles + ' every ' + info.period + ' with Subscribe &amp; Save' + (n > 1 ? ' · ' + esc(fmt(amount / n)) + ' per bottle' : '')
+            : bottles + ', one-time purchase' + (n > 1 ? ' · ' + esc(fmt(amount / n)) + ' per bottle' : '') + (sub < amount ? ' · ' + esc(fmt(sub)) + ' with Subscribe &amp; Save' : '');
+          var target = function (p) { return p.querySelector('.elParagraph') || p; };
+          if (heroPrices.length > 1) { target(heroPrices[0]).innerHTML = big; target(heroPrices[1]).innerHTML = cap; }
+          else target(heroPrices[0]).innerHTML = big + ' ' + cap;
         }
       }
       function choose(opt, focus) {

@@ -39,7 +39,7 @@
 [data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide { width: auto !important; height: auto !important; margin: 0 !important; aspect-ratio: 1 / 1; border: 1px solid var(--ohs-line, #dedad3); border-radius: var(--ohs-r-md, 12px) !important; background: var(--ohs-sand, #f5f4f2); overflow: hidden; cursor: pointer; opacity: 1 !important; transition: border-color .2s }
 [data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide:hover { border-color: var(--ohs-green-100, #d3eae5) }
 [data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide-thumb-active { border: 2px solid var(--ohs-green, #108474) }
-[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide img { width: 100% !important; height: 100% !important; object-fit: contain !important; padding: 6px; border-radius: 0 !important }
+[data-page-element="CheckoutProductImageCarousel/V1"] .slider-nav .swiper-slide img { width: 100% !important; height: 100% !important; object-fit: contain !important; padding: 0 !important; border-radius: 0 !important }
 [data-page-element="CheckoutProductImageCarousel/V1"] .swiper-scrollbar { display: none !important }
 
 /* Promo pill from the data-badge attribute (same look as .ohs-badge--gold) */
