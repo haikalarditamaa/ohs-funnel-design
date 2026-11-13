@@ -26,6 +26,12 @@
 [data-ohs~="sec"] [data-ohs~="wrap"]:not([data-ohs~="center"]) :is(h1,h2,h3,h4,h5,h6,p),
 [data-ohs~="card"] :is(h1,h2,h3,h4,h5,h6,p) { text-align: left !important }
 
+/* Rows: drop ClickFunnels' default 20px row padding, so the space between rows
+   is just style.css's wrap + wrap gap (40px; 32px on phones). */
+[data-ohs~="sec"] [data-ohs~="wrap"] { padding-top: 0 !important; padding-bottom: 0 !important }
+[data-ohs~="sec"] [data-ohs~="wrap"] + [data-ohs~="wrap"] { margin-top: 40px !important }
+@media (max-width: 767px) { [data-ohs~="sec"] [data-ohs~="wrap"] + [data-ohs~="wrap"] { margin-top: 32px !important } }
+
 [data-ohs~="ico-box"]      { --ico: var(--i-box) }
 [data-ohs~="ico-autoship"] { --ico: var(--i-autoship) }
 [data-ohs~="ico-clock"]    { --ico: var(--i-clock) }
@@ -94,17 +100,41 @@
 /* Title bar */
 [data-ohs~="ty-order-title"] { margin: 0 !important; padding: 16px 24px !important; background: var(--ohs-sand) !important; border-bottom: 1px solid var(--ohs-line) }
 [data-ohs~="ty-order-title"] p { font-size: 18px !important; line-height: 24px !important; font-weight: 700 !important; color: var(--ohs-ink) !important; text-align: left !important }
-/* ClickFunnels' Order Confirmation element (any element inside the card that isn't tagged).
-   First pass, written without the element's exact markup: check it on a sandbox order. */
-[data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) { margin: 0 !important; padding: 20px 24px !important; text-align: left !important }
-[data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) [data-page-element] { padding: 0 !important }
-[data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) * { font-family: var(--ohs-font) !important; text-align: left; color: var(--ohs-text) }
-[data-ohs~="ty-order"] table { width: 100% !important; border-collapse: collapse !important; border: 0 !important; background: none !important }
-[data-ohs~="ty-order"] :is(th,td) { padding: 8px 0 !important; border: 0 !important; border-bottom: 1px solid var(--ohs-line) !important; background: none !important; font-size: 14px !important; line-height: 20px !important; vertical-align: top }
-[data-ohs~="ty-order"] th { font-size: 12px !important; line-height: 16px !important; font-weight: 700 !important; letter-spacing: .08em; text-transform: uppercase; color: var(--ohs-muted) !important }
-[data-ohs~="ty-order"] :is(th,td):last-child { text-align: right !important; color: var(--ohs-ink) !important; font-weight: 600 }
-[data-ohs~="ty-order"] tr:last-child td { border-bottom: 0 !important; font-size: 18px !important; font-weight: 800 !important; color: var(--ohs-ink) !important; padding-top: 12px !important }
-[data-ohs~="ty-order"] img { width: 72px !important; height: 72px !important; object-fit: contain; border-radius: var(--ohs-r-md); background: var(--ohs-sand) }
+/* Order number added to the title bar by thankyou.js */
+[data-ohs~="ty-order-title"] p { display: flex !important; justify-content: space-between; align-items: baseline; gap: 12px }
+[data-ohs~="ty-order-title"] .ohs-ty-num { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--ohs-muted) }
+
+/* ClickFunnels' Order Confirmation element (markup checked on a sandbox order):
+   .elOrderConfirmationV1 > Head (icon + "Order Confirmation. Order ID: #1105 (Paid)")
+   + Body > Product > ProductInfoWrapper (Name + Info: "Qty 1", "$72.00 / 3 months")
+   + Foot (SubTotal / TaxTotal / ShippingTotal: Item + Price) + Total */
+[data-ohs~="ty-order"] [data-page-element^="OrderConfirmation"] { margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important }
+[data-ohs~="ty-order"] .elOrderConfirmationV1 { margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important }
+[data-ohs~="ty-order"] .elOrderConfirmationV1 * { font-family: var(--ohs-font) !important; text-align: left !important; letter-spacing: 0 !important; text-transform: none !important }
+/* head: hidden once thankyou.js has moved the number to the title bar */
+[data-ohs~="ty-order"] .elOrderConfirmationHead { display: flex !important; align-items: center; gap: 8px; margin: 0 !important; padding: 16px 24px 0 !important; background: none !important; border: 0 !important }
+[data-ohs~="ty-order"] .elOrderConfirmationHeadIcon { display: none !important }
+[data-ohs~="ty-order"] .elOrderConfirmationHeadTitle { font-size: 14px !important; line-height: 20px !important; font-weight: 500 !important; color: var(--ohs-muted) !important }
+[data-ohs~="ty-order"][data-ohs-num] .elOrderConfirmationHead { display: none !important }
+/* product */
+[data-ohs~="ty-order"] .elOrderConfirmationBody { margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important }
+[data-ohs~="ty-order"] .elOrderConfirmationProduct { display: flex !important; gap: 16px; align-items: center; margin: 0 !important; padding: 20px 24px !important; background: none !important; border: 0 !important }
+[data-ohs~="ty-order"] .elOrderConfirmationProduct + .elOrderConfirmationProduct { border-top: 1px solid var(--ohs-line) !important }
+[data-ohs~="ty-order"] .elOrderConfirmationProduct img { flex: none; width: 72px !important; height: 72px !important; object-fit: contain; border-radius: var(--ohs-r-md); background: var(--ohs-sand) }
+[data-ohs~="ty-order"] .elOrderConfirmationProductInfoWrapper { flex: 1; min-width: 0; margin: 0 !important; padding: 0 !important }
+[data-ohs~="ty-order"] .elOrderConfirmationProductInfoName { display: block; font-size: 16px !important; line-height: 22px !important; font-weight: 700 !important; color: var(--ohs-ink) !important }
+[data-ohs~="ty-order"] .elOrderConfirmationProductInfo { display: flex !important; flex-wrap: wrap; gap: 4px 0; margin: 2px 0 0 !important; padding: 0 !important }
+[data-ohs~="ty-order"] .elOrderConfirmationProductInfo > span { font-size: 14px !important; line-height: 20px !important; font-weight: 400 !important; color: var(--ohs-muted) !important; margin: 0 !important }
+[data-ohs~="ty-order"] .elOrderConfirmationProductInfo > span + span::before { content: "·"; margin: 0 6px }
+/* subtotal / taxes / shipping */
+[data-ohs~="ty-order"] .elOrderConfirmationFoot { display: grid !important; gap: 8px; margin: 0 !important; padding: 16px 24px !important; border: 0 !important; border-top: 1px solid var(--ohs-line) !important; background: none !important }
+[data-ohs~="ty-order"] .elOrderConfirmationFoot > div { display: flex !important; justify-content: space-between; gap: 16px; height: auto !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important }
+[data-ohs~="ty-order"] .elOrderConfirmationItem { font-size: 14px !important; line-height: 20px !important; font-weight: 400 !important; color: var(--ohs-muted) !important }
+[data-ohs~="ty-order"] .elOrderConfirmationPrice { font-size: 14px !important; line-height: 20px !important; font-weight: 500 !important; color: var(--ohs-ink) !important; text-align: right !important }
+/* total */
+[data-ohs~="ty-order"] .elOrderConfirmationTotal { display: flex !important; justify-content: space-between; align-items: baseline; gap: 16px; height: auto !important; min-height: 0 !important; margin: 0 !important; padding: 16px 24px !important; border: 0 !important; border-top: 1px solid var(--ohs-line) !important; background: none !important }
+[data-ohs~="ty-order"] .elOrderConfirmationTotal > span:first-child { font-size: 16px !important; line-height: 24px !important; font-weight: 600 !important; color: var(--ohs-ink) !important }
+[data-ohs~="ty-order"] .elOrderConfirmationTotal > span:last-child { font-size: 26px !important; line-height: 30px !important; font-weight: 800 !important; letter-spacing: -.5px !important; color: var(--ohs-ink) !important }
 /* Subscription strip */
 [data-ohs~="ty-renew"] { margin: 0 !important; padding: 14px 24px 14px 54px !important; background: var(--ohs-green-50) !important; position: relative !important; border-top: 1px solid var(--ohs-line) }
 [data-ohs~="ty-renew"]::before {
@@ -113,7 +143,8 @@
 }
 [data-ohs~="ty-renew"] p { font-size: 14px !important; line-height: 20px !important; color: var(--ohs-green-700) !important; text-align: left !important }
 @media (max-width: 767px) {
-  [data-ohs~="ty-order-title"], [data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) { padding-left: 20px !important; padding-right: 20px !important }
+  [data-ohs~="ty-order-title"],
+  [data-ohs~="ty-order"] :is(.elOrderConfirmationHead, .elOrderConfirmationProduct, .elOrderConfirmationFoot, .elOrderConfirmationTotal) { padding-left: 20px !important; padding-right: 20px !important }
   [data-ohs~="ty-renew"] { padding-left: 50px !important; padding-right: 20px !important }
   [data-ohs~="ty-renew"]::before { left: 20px }
 }
