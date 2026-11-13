@@ -4,11 +4,13 @@
 
    Checkout:   remembers the shopper's first name while they type it
                (sessionStorage: this browser tab only, never sent anywhere).
-   Thank-you:  1. Headline tagged "ty-name": "Thank you!" becomes
-                  "Thank you, Sarah." (stays "Thank you!" if no name).
+   Thank-you:  1. Headline tagged "ty-name" (or "ty-tick"): "Thank you!" becomes
+                  "Thank you, Sarah." A {{…first_name}} tag typed in the headline
+                  is replaced the same way. No name: "Thank you!".
                2. Order number from ClickFunnels' Order Confirmation element
                   goes into the "ty-pills" chip and the card's title bar.
                3. "USD 72.00" in the order card becomes "$72.00".
+               4. Tags the Order Confirmation's column "ty-order" if it isn't.
    ClickFunnels page text doesn't render {{contact.first_name}}, and the
    thank-you page gets no contact data, hence the hand-off from checkout.
    ===================================================================== */
@@ -38,11 +40,42 @@
   /* ---------- Thank-you page ---------- */
   function nice(n) { return n.charAt(0).toUpperCase() + n.slice(1); }
 
+  function textNodes(el) {
+    var out = [], w = d.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) out.push(n);
+    return out;
+  }
+
+  // Headline written with a merge tag, e.g. "Thank you, {{contact.first_name}}. Your…":
+  // ClickFunnels shows the tag as plain text, so swap it for the name (or drop it).
+  function fillPlaceholder(h, name) {
+    var nodes = textNodes(h), TAG = /\{\{[^}]*\}\}/;
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i], m = node.nodeValue.match(TAG);
+      if (!m) continue;
+      var rest = node.nodeValue.slice(m.index + m[0].length);
+      if (name) {
+        // add a full stop unless the headline already has punctuation right after the tag
+        var dot = /^\s*[.,!?]/.test(rest) ? '' : '.';
+        node.nodeValue = node.nodeValue.slice(0, m.index) + nice(name) + dot + rest;
+      } else {
+        node.nodeValue = node.nodeValue.slice(0, m.index) + rest.replace(/^\s*[.,]/, '');
+        var all = textNodes(h);                      // "Thank you, " -> "Thank you!"
+        for (var j = 0; j < all.length; j++) {
+          if (/Thank you,\s*$/.test(all[j].nodeValue)) { all[j].nodeValue = all[j].nodeValue.replace(/Thank you,\s*$/, 'Thank you! '); break; }
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
   function fillName() {
     var name = load();
-    if (!name) return;
-    var h = d.querySelector('[data-ohs~="ty-name"]');
+    // the tagged headline; falls back to the check-mark headline if ty-name was left off
+    var h = d.querySelector('[data-ohs~="ty-name"]') || d.querySelector('[data-ohs~="ty-tick"]');
     if (!h) return;
+    if (fillPlaceholder(h, name) || !name) return;
     var walker = d.createTreeWalker(h, NodeFilter.SHOW_TEXT, null), node;
     while ((node = walker.nextNode())) {
       var i = node.nodeValue.indexOf('Thank you!');
@@ -65,6 +98,12 @@
     var oc = d.querySelector('[data-page-element^="OrderConfirmation"]');
     if (!oc) return;
 
+    // the card styling hangs on the column's "ty-order" tag: add it if it was left off
+    if (!oc.closest('[data-ohs~="ty-order"]')) {
+      var c = oc.closest('[data-page-element^="ColContainer"]');
+      if (c) c.setAttribute('data-ohs', ((c.getAttribute('data-ohs') || '') + ' ty-order').trim());
+    }
+
     // "USD 72.00" -> "$72.00"
     var prices = oc.querySelectorAll('span');
     for (var i = 0; i < prices.length; i++) {
@@ -78,12 +117,26 @@
     if (!m) { if (pills) pills.style.display = 'none'; return; }
     var num = '#' + m[1];
 
-    // chip: put the number in the chip's bold text
+    // chip: the bold part becomes "#1105". Uses the outermost bold that holds the "#"
+    // (the editor often nests empty bolds), and drops any "#" typed outside it.
     if (pills) {
-      var bs = pills.querySelectorAll('b, strong'), target = null;
-      for (var j = bs.length - 1; j >= 0; j--) if (!bs[j].querySelector('b, strong')) { target = bs[j]; break; }
-      if (target) target.textContent = num;
-      else pills.style.display = 'none';
+      var li = pills.querySelector('li') || pills;
+      var bs = li.querySelectorAll('b, strong'), target = null;
+      for (var j = 0; j < bs.length; j++) {
+        if (bs[j].parentNode.closest && bs[j].parentNode.closest('b, strong')) continue;   // nested: skip
+        if (bs[j].textContent.indexOf('#') !== -1) { target = bs[j]; break; }
+        if (!target && bs[j].textContent.trim()) target = bs[j];
+      }
+      if (!target) {                                 // no bold with text: bold the number ourselves
+        target = d.createElement('b');
+        (li.querySelector('.elBulletListTextWrapper') || li).appendChild(target);
+      }
+      target.textContent = num;
+      var t = textNodes(li);
+      for (var k = 0; k < t.length; k++) {
+        if (target.contains(t[k])) continue;
+        if (t[k].nodeValue.indexOf('#') !== -1) t[k].nodeValue = t[k].nodeValue.replace(/\s*#+\s*$/, ' ').replace(/#/g, '');
+      }
     }
 
     // card title bar: "Your order            #1105"

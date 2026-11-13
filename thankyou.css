@@ -102,7 +102,7 @@
 [data-ohs~="ty-order-title"] p { font-size: 18px !important; line-height: 24px !important; font-weight: 700 !important; color: var(--ohs-ink) !important; text-align: left !important }
 /* Order number added to the title bar by thankyou.js */
 [data-ohs~="ty-order-title"] p { display: flex !important; justify-content: space-between; align-items: baseline; gap: 12px }
-[data-ohs~="ty-order-title"] .ohs-ty-num { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--ohs-muted) }
+[data-ohs~="ty-order-title"] p .ohs-ty-num { font-size: 14px !important; line-height: 20px !important; font-weight: 500 !important; color: var(--ohs-muted) !important }
 
 /* ClickFunnels' Order Confirmation element (markup checked on a sandbox order):
    .elOrderConfirmationV1 > Head (icon + "Order Confirmation. Order ID: #1105 (Paid)")
