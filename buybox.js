@@ -16,6 +16,11 @@
      data-plan         (optional) plan selected on load: subscribe or once            default subscribe
      data-slides       (optional) product image shown per bundle "bottles|image#;…"  default "1|1;3|5;5|6"
                        (image numbers count from 1 in the ClickFunnels Product Image Carousel; "" turns it off)
+     data-name         (optional) product name in the phone sticky bar               default "Optimal NanoBlue"
+     data-image        (optional) image URL in the phone sticky bar                  default NanoBlue bottle
+     data-one-note     (optional) note under Buy 1 on One-time                       default "1 bottle · 30 servings"
+   Single product: give data-prices / data-sub-prices only a "1|…" entry and the bundle cards disappear;
+   the two plan cards show their own prices instead (store-style Subscribe & Save / One-time choice).
 
    "Add to cart" opens  <checkout>?plan=subscribe|once&bottles=1|3|5  (+ utm_* / ad click ids).
    footer.js on the checkout selects the product whose name holds that bottle count
@@ -79,6 +84,13 @@
     '.ohs-bb .ohs-plan__micro{justify-content:center}' +
     '[data-ohs~="price"] s{margin-right:8px;color:var(--ohs-muted)}' +
     '@media (max-width:400px){.ohs-bb__plans .ohs-bb__opt{padding:12px 10px;gap:8px}.ohs-bb__plans .ohs-bb__opt.is-selected{padding:11px 9px}.ohs-bb__ptitle{font-size:15px;line-height:22px}.ohs-bb__deal{font-size:14px;line-height:20px}.ohs-bb__bundles .ohs-bb__opt{gap:10px;padding:16px 12px}.ohs-bb__bundles .ohs-bb__opt.is-selected{padding:15px 11px}}' +
+    /* single product (only one bundle priced): plan cards become full-width rows with prices, bundle list hidden */
+    '.ohs-bb__bundles[hidden]{display:none!important}' +
+    '.ohs-bb--single .ohs-bb__plans{grid-template-columns:1fr}' +
+    '.ohs-bb--single .ohs-bb__plans .ohs-bb__opt{align-items:center;padding:16px}' +
+    '.ohs-bb--single .ohs-bb__plans .ohs-bb__opt.is-selected{padding:15px}' +
+    '.ohs-bb--single .ohs-bb__ptext{flex:1}' +
+    '.ohs-bb--single .ohs-bb__ptitle{font-size:18px;line-height:26px}' +
     '@media (prefers-reduced-motion:reduce){.ohs-bb__opt,.ohs-bb__radio{transition:none}}';
 
   function all(sel, ctx) { return Array.prototype.slice.call((ctx || d).querySelectorAll(sel)); }
@@ -170,18 +182,22 @@
     var uid = 'ohs-bb' + index;
     var slidesAttr = slot.getAttribute('data-slides');
     var slides = parsePrices(slidesAttr == null ? '1|1;3|5;5|6' : slidesAttr);
+    var oneNoteAttr = slot.getAttribute('data-one-note');
+    var oneNote = oneNoteAttr == null ? '1 bottle · 30 servings' : oneNoteAttr;
 
-    var html = '<div class="ohs ohs-bb" data-ohs-bb>' +
-      '<div class="ohs-bb__head"><span class="ohs-bb__label" id="' + uid + '-h">Choose your bundle</span><span class="ohs-bb__badge" data-bb-saved hidden></span></div>';
+    var single = list.length === 1 && hasSub;
+    var pp = single ? function (pl) { return '<span class="ohs-bb__prices"><span class="ohs-bb__price" data-bb-pprice="' + pl + '"></span><s data-bb-pwas="' + pl + '"></s></span>'; } : function () { return ''; };
+    var html = '<div class="ohs ohs-bb' + (single ? ' ohs-bb--single' : '') + '" data-ohs-bb>' +
+      '<div class="ohs-bb__head"><span class="ohs-bb__label" id="' + uid + '-h">' + (single ? 'Choose how you buy' : 'Choose your bundle') + '</span><span class="ohs-bb__badge" data-bb-saved hidden></span></div>';
     if (hasSub) {
       html += '<div class="ohs-bb__plans" role="radiogroup" aria-label="Purchase type">' +
         '<div class="ohs-bb__opt" role="radio" data-plan="subscribe"><span class="ohs-bb__radio" aria-hidden="true"></span>' +
-          '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle">Subscribe &amp; Save</span><span class="ohs-bb__psub">Extra ' + subPct + '% off</span></span></div>' +
+          '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle">Subscribe &amp; Save</span><span class="ohs-bb__psub">' + (single ? 'Save ' + subPct + '% · ships every ' + list[0].period + ' · cancel anytime' : 'Extra ' + subPct + '% off') + '</span></span>' + pp('subscribe') + '</div>' +
         '<div class="ohs-bb__opt" role="radio" data-plan="once"><span class="ohs-bb__radio" aria-hidden="true"></span>' +
-          '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle">One-time</span><span class="ohs-bb__psub">HSA/FSA via TrueMed</span></span></div>' +
+          '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle">One-time</span><span class="ohs-bb__psub">' + (single ? 'Single order · HSA/FSA via TrueMed' : 'HSA/FSA via TrueMed') + '</span></span>' + pp('once') + '</div>' +
       '</div>';
     }
-    html += '<div class="ohs-bb__bundles" role="radiogroup" aria-labelledby="' + uid + '-h">';
+    html += '<div class="ohs-bb__bundles" role="radiogroup" aria-labelledby="' + uid + '-h"' + (single ? ' hidden' : '') + '>';
     list.forEach(function (b) {
       html += '<div class="ohs-bb__opt' + (b.ribbon ? ' has-ribbon' : '') + '" role="radio" data-qty="' + b.qty + '">' +
         (b.ribbon ? '<span class="ohs-bb__badge ohs-bb__ribbon' + (b.gold ? ' ohs-bb__badge--gold' : ' ohs-bb__badge--navy') + '">' + esc(b.ribbon) + '</span>' : '') +
@@ -219,8 +235,8 @@
       sticky = d.createElement('div');
       sticky.className = 'ohs ohs-sticky';
       sticky.setAttribute('aria-hidden', 'true');
-      sticky.innerHTML = '<img class="ohs-sticky__img" src="https://www.optimalhealthsystems.com/cdn/shop/files/OHS-NanoBlue1.png?width=120" alt="" width="48" height="48">' +
-        '<span class="ohs-sticky__text"><span class="ohs-sticky__name">Optimal NanoBlue</span><span class="ohs-sticky__meta"></span></span>' +
+      sticky.innerHTML = '<img class="ohs-sticky__img" src="' + esc(slot.getAttribute('data-image') || 'https://www.optimalhealthsystems.com/cdn/shop/files/OHS-NanoBlue1.png?width=120') + '" alt="" width="48" height="48">' +
+        '<span class="ohs-sticky__text"><span class="ohs-sticky__name">' + esc(slot.getAttribute('data-name') || 'Optimal NanoBlue') + '</span><span class="ohs-sticky__meta"></span></span>' +
         '<a class="ohs-btn ohs-btn--plain" tabindex="-1" href="' + esc(base) + '">Add to cart</a>';
       stickyCta = sticky.querySelector('a');
       stickyMeta = sticky.querySelector('.ohs-sticky__meta');
@@ -263,10 +279,16 @@
         var notes = [];
         if (n > 1) notes.push(fmt(amt / n) + ' per bottle');
         if (p === 'subscribe') notes.push('Ships every ' + bi.period);
-        else if (n === 1) notes.push('1 bottle · 30 servings');
+        else if (n === 1 && oneNote) notes.push(oneNote);
         o.querySelector('[data-bb-note]').textContent = notes.join(' · ');
         var label = bi.title + ', ' + fmt(amt) + (save > 0.005 ? ', save ' + short(save) : '') + (deal.textContent ? ', ' + deal.textContent : '');
         o.setAttribute('aria-label', label);
+      });
+      if (single) ['subscribe', 'once'].forEach(function (pl) {
+        var a = price[pl][q], w = unit * q;
+        var pe = box.querySelector('[data-bb-pprice="' + pl + '"]'), we = box.querySelector('[data-bb-pwas="' + pl + '"]');
+        if (pe) pe.textContent = fmt(a);
+        if (we) { we.textContent = w - a > 0.005 ? fmt(w) : ''; we.hidden = !(w - a > 0.005); }
       });
       var amount = price[p][q], was = unit * q, save = was - amount;
       var href = checkoutUrl(base, p, q);
@@ -280,7 +302,8 @@
       if (heroPrices.length) {
         var big = '<b>' + esc(fmt(amount)) + '</b>' + (was > amount ? '<s>' + esc(fmt(was)) + '</s>' : '');
         var dt = dealText(b, p);
-        var cap = q + (q > 1 ? ' bottles' : ' bottle') + (dt ? ' · ' + esc(dt) : '') +
+        var cap = single ? (p === 'subscribe' ? 'Subscribe &amp; Save ' + subPct + '% · ships every ' + esc(b.period) + ' · cancel anytime' : 'One-time purchase' + (oneNote ? ' · ' + esc(oneNote) : '')) :
+          q + (q > 1 ? ' bottles' : ' bottle') + (dt ? ' · ' + esc(dt) : '') +
           (p === 'subscribe' ? ' · ships every ' + esc(b.period) : ' · one-time purchase') +
           (q > 1 ? ' · ' + esc(fmt(amount / q)) + ' per bottle' : '');
         var target = function (el) { return el.querySelector('.elParagraph') || el; };
