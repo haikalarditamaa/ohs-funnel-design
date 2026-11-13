@@ -39,8 +39,21 @@
 [data-ohs~="ico-mail"]     { --ico: var(--i-mail) }
 
 
+/* Confirmation hero: even space above and below. style.css's sec-hero padding is made
+   for the product page (40px top / 96px bottom, 0 top on phones). The check circle's
+   8px ring reaches into the top padding, so the top gets 8px extra: 72px clear space
+   above the ring and below the order chip (48px on phones). */
+[data-ohs~="sec"]:has([data-ohs~="ty-tick"]) { padding-top: 80px !important; padding-bottom: 72px !important }
+@media (max-width: 767px) {
+  [data-ohs~="sec"]:has([data-ohs~="ty-tick"]) { padding-top: 56px !important; padding-bottom: 48px !important }
+}
+
+/* note: the health tip reads left-aligned, also inside a centred row */
+[data-ohs~="center"] [data-ohs~="note"] p, [data-ohs~="note"] p { text-align: left !important }
+
 /* ---------- ty-tick (Headline): green check circle above the H1 ---------- */
 [data-ohs~="ty-tick"] { position: relative !important; padding-top: 92px !important }
+[data-ohs~="ty-tick"] :is(h1,h2,h3,p) { text-wrap: balance }
 [data-ohs~="ty-tick"]::before {
   content: ""; position: absolute; top: 0; left: 50%; width: 72px; height: 72px; margin-left: -36px;
   border-radius: 50%; background: var(--ohs-green); box-shadow: 0 0 0 8px var(--ohs-green-50);
