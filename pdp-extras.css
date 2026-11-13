@@ -52,6 +52,11 @@
   [data-ohs~="diet-badges"] li::after { top: 14px; width: 24px; height: 24px; margin-left: -12px }
 }
 
+/* ---------- card + review grids inside a nested Section ----------
+   ClickFunnels gives every row 20px top/bottom padding; in a nested grid that adds 40px to each
+   gap (64px between card rows instead of 24) and pushes the grid below its column's heading. */
+[data-ohs~="wrap"]:has(> :is([data-ohs~="card"],[data-ohs~="review"])) { padding-top: 0 !important; padding-bottom: 0 !important }
+
 /* ---------- review grid (2 per row) ---------- */
 [data-ohs~="wrap"]:has(> [data-ohs~="review"]) { gap: 16px !important; align-items: stretch !important }
 [data-ohs~="wrap"]:has(> [data-ohs~="review"])::before,
