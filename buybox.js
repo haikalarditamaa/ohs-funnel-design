@@ -22,6 +22,14 @@
    Single product: give data-prices / data-sub-prices only a "1|…" entry and the bundle cards disappear;
    the two plan cards show their own prices instead (store-style Subscribe & Save / One-time choice).
 
+   PRODUCT MODE (default when the Paragraph has NO data-prices attribute): prices come from the
+   product(s) attached to the funnel step, which ClickFunnels prints as window.globalResourceData.
+   Bottle count = the number before "bottle(s)" in the product name (none = 1). Per bottle count:
+   the one-time price and every subscription price. Several subscription prices (e.g. "Delivery
+   Every 1 / 2 / 3 Month") add a "Deliver every" choice. Savings, struck prices and "Subscribe & Save"
+   wording only show when the subscription really costs less. Add to cart also passes &price=<id>
+   so the checkout selects that exact price (footer.js). data-unit still overrides the regular price.
+
    "Add to cart" opens  <checkout>?plan=subscribe|once&bottles=1|3|5  (+ utm_* / ad click ids).
    footer.js on the checkout selects the product whose name holds that bottle count
    (NanoBlue · NanoBlue - 3 Bottles · NanoBlue - 5 Bottles) and its matching price.
@@ -91,6 +99,16 @@
     '.ohs-bb--single .ohs-bb__plans .ohs-bb__opt.is-selected{padding:15px}' +
     '.ohs-bb--single .ohs-bb__ptext{flex:1}' +
     '.ohs-bb--single .ohs-bb__ptitle{font-size:18px;line-height:26px}' +
+    /* "Deliver every" interval pills (product mode, several subscription prices) */
+    '.ohs-bb__every{display:grid;gap:8px}' +
+    '.ohs-bb__every[hidden]{display:none!important}' +
+    '.ohs-bb__every-label{font-size:14px;line-height:20px;font-weight:600;color:var(--ohs-ink)}' +
+    '.ohs-bb__pills{display:flex;flex-wrap:wrap;gap:8px}' +
+    '.ohs-bb__pill{appearance:none;-webkit-appearance:none;margin:0;font:inherit;font-size:14px;line-height:20px;font-weight:600;padding:9px 16px;min-height:40px;border-radius:999px;border:1px solid var(--ohs-line);background:#fff;color:var(--ohs-ink);cursor:pointer;transition:border-color 150ms ' + E + ',background-color 150ms ' + E + '}' +
+    '.ohs-bb__pill:hover{border-color:var(--ohs-green-100)}' +
+    '.ohs-bb__pill:focus-visible{outline:none;box-shadow:var(--ohs-ring)}' +
+    '.ohs-bb__pill[aria-checked="true"]{border:2px solid var(--ohs-green);padding:8px 15px;background:var(--ohs-green-50);color:var(--ohs-green-700)}' +
+    '@media (prefers-reduced-motion:reduce){.ohs-bb__pill{transition:none}}' +
     '@media (prefers-reduced-motion:reduce){.ohs-bb__opt,.ohs-bb__radio{transition:none}}';
 
   function all(sel, ctx) { return Array.prototype.slice.call((ctx || d).querySelectorAll(sel)); }
@@ -105,13 +123,14 @@
     });
     return o;
   }
-  function checkoutUrl(base, plan, bottles) {
+  function checkoutUrl(base, plan, bottles, priceId) {
     var keep = new URLSearchParams();
     new URLSearchParams(location.search).forEach(function (v, k) {
       if (/^utm_/.test(k) || /^(fbclid|gclid|msclkid|ttclid|affiliate_id|aff_sub)$/.test(k)) keep.set(k, v);
     });
     keep.set('plan', plan);
     keep.set('bottles', String(bottles));
+    if (priceId) keep.set('price', String(priceId));
     return base + (base.indexOf('?') > -1 ? '&' : '?') + keep.toString();
   }
   function addCss() {
@@ -164,21 +183,66 @@
     if (th) th.click();
   }
 
+  /* Prices of the product(s) attached to this funnel step, by bottle count:
+     { 1: { once: {id, amt}, subs: [{id, amt, n, unit, label}] }, 3: {…} }  or null */
+  function intervalOf(name) {
+    var m = /(\d+)\s*(day|week|month|year)/i.exec(name || '');
+    var n = m ? parseInt(m[1], 10) : 1, u = m ? m[2].toLowerCase() : 'month';
+    if (!m) { var m2 = /\b(day|week|month|year)/i.exec(name || ''); if (m2) u = m2[1].toLowerCase(); }
+    var days = { day: 1, week: 7, month: 30, year: 365 }[u] * n;
+    return { n: n, unit: u, days: days, label: n === 1 ? u : n + ' ' + u + 's' };
+  }
+  function productPrices() {
+    var g = window.globalResourceData, out = {}, any = false;
+    if (!g || !g.products || !g.products.length) return null;
+    g.products.forEach(function (prod) {
+      if (prod.bump) return;
+      var v = prod.default_variant || (prod.variants || [])[0];
+      if (!v || !v.prices) return;
+      var m = /(\d+)\s*(?:x\s*)?bottles?/i.exec(v.name || prod.name || '');
+      var q = m ? parseInt(m[1], 10) : 1;
+      if (out[q]) return;   // first product per bottle count wins
+      var e = { once: null, subs: [] };
+      v.prices.forEach(function (pr) {
+        var amt = pr.price_cents / 100;
+        if (!pr.is_recurring) { if (!e.once) e.once = { id: pr.id, amt: amt }; }
+        else { var iv = intervalOf(pr.name); e.subs.push({ id: pr.id, amt: amt, n: iv.n, unit: iv.unit, days: iv.days, label: iv.label }); }
+      });
+      e.subs.sort(function (a, b) { return a.days - b.days; });
+      if (e.once) { out[q] = e; any = true; }
+    });
+    return any ? out : null;
+  }
+
   function build(slot, index) {
     if (slot.querySelector('.ohs-bb')) return;
     var base = slot.getAttribute('data-checkout') || '';
     if (!base && window.console) console.warn('[OHS] Buybox: add a data-checkout Custom Attribute (the checkout URL) to the bundle-slot Paragraph.');
-    var price = {
-      once: parsePrices(slot.getAttribute('data-prices') || '1|40;3|80;5|120'),
-      subscribe: parsePrices(slot.getAttribute('data-sub-prices') || '1|36;3|72;5|108')
-    };
+    var src = slot.hasAttribute('data-prices') ? null : productPrices();
+    var price = { once: {}, subscribe: {} }, subs = {}, subSel = {};
+    if (src) {
+      Object.keys(src).forEach(function (k) {
+        var q = parseInt(k, 10);
+        price.once[q] = src[q].once.amt;
+        if (src[q].subs.length) { subs[q] = src[q].subs; subSel[q] = 0; price.subscribe[q] = subs[q][0].amt; }
+      });
+    } else {
+      price.once = parsePrices(slot.getAttribute('data-prices') || '1|40;3|80;5|120');
+      price.subscribe = parsePrices(slot.getAttribute('data-sub-prices') || '1|36;3|72;5|108');
+    }
     var unit = parseFloat(slot.getAttribute('data-unit')) || price.once[1] || 40;
-    var list = BUNDLES.filter(function (b) { return price.once[b.qty] != null; });
+    var known = BUNDLES.map(function (b) { return b.qty; });
+    var list = BUNDLES.map(function (b) { return { qty: b.qty, title: b.title, deal: b.deal, period: b.period, ribbon: b.ribbon, gold: b.gold }; })
+      .concat(Object.keys(price.once).map(Number).filter(function (q) { return known.indexOf(q) < 0; }).sort(function (a, b) { return a - b; })
+        .map(function (q) { return { qty: q, title: 'Buy ' + q, deal: '', period: q + ' months' }; }))
+      .filter(function (b) { return price.once[b.qty] != null; })
+      .sort(function (a, b) { return a.qty - b.qty; });
     if (!list.length) return;
     var hasSub = list.every(function (b) { return price.subscribe[b.qty] != null; });
     var defQty = parseInt(slot.getAttribute('data-default'), 10) || 3;
     var defPlan = hasSub && (slot.getAttribute('data-plan') || 'subscribe') !== 'once' ? 'subscribe' : 'once';
-    var subPct = hasSub ? Math.round((1 - price.subscribe[1] / price.once[1]) * 100) : 0;
+    function curSub(q) { return subs[q] ? subs[q][subSel[q]] : null; }
+    function pct(q) { return hasSub && price.once[q] ? Math.max(0, Math.round((1 - price.subscribe[q] / price.once[q]) * 100)) : 0; }
     var uid = 'ohs-bb' + index;
     var slidesAttr = slot.getAttribute('data-slides');
     var slides = parsePrices(slidesAttr == null ? '1|1;3|5;5|6' : slidesAttr);
@@ -192,10 +256,11 @@
     if (hasSub) {
       html += '<div class="ohs-bb__plans" role="radiogroup" aria-label="Purchase type">' +
         '<div class="ohs-bb__opt" role="radio" data-plan="subscribe"><span class="ohs-bb__radio" aria-hidden="true"></span>' +
-          '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle">Subscribe &amp; Save</span><span class="ohs-bb__psub">' + (single ? 'Save ' + subPct + '% · ships every ' + list[0].period + ' · cancel anytime' : 'Extra ' + subPct + '% off') + '</span></span>' + pp('subscribe') + '</div>' +
+          '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle" data-bb-ptitle>Subscribe &amp; Save</span><span class="ohs-bb__psub" data-bb-psub></span></span>' + pp('subscribe') + '</div>' +
         '<div class="ohs-bb__opt" role="radio" data-plan="once"><span class="ohs-bb__radio" aria-hidden="true"></span>' +
           '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle">One-time</span><span class="ohs-bb__psub">' + (single ? 'Single order · HSA/FSA via TrueMed' : 'HSA/FSA via TrueMed') + '</span></span>' + pp('once') + '</div>' +
       '</div>';
+      html += '<div class="ohs-bb__every" data-bb-every hidden><span class="ohs-bb__every-label" id="' + uid + '-e">Deliver every</span><div class="ohs-bb__pills" role="radiogroup" aria-labelledby="' + uid + '-e" data-bb-pills></div></div>';
     }
     html += '<div class="ohs-bb__bundles" role="radiogroup" aria-labelledby="' + uid + '-h"' + (single ? ' hidden' : '') + '>';
     list.forEach(function (b) {
@@ -256,12 +321,38 @@
     function qty() { var o = box.querySelector('.ohs-bb__bundles .is-selected'); return parseInt(o.getAttribute('data-qty'), 10); }
     function info(q) { return list.filter(function (x) { return x.qty === q; })[0]; }
     function dealText(b, p) {
-      if (p === 'subscribe') return b.deal ? b.deal + ' + ' + subPct + '% off' : 'Save ' + subPct + '% every month';
+      var k = pct(b.qty);
+      if (p === 'subscribe') return b.deal ? b.deal + (k ? ' + ' + k + '% off' : '') : (k ? 'Save ' + k + '% every ' + b.period : '');
       return b.deal;
+    }
+    // "Deliver every" pills for the selected bottle count (only with 2+ subscription prices)
+    var every = box.querySelector('[data-bb-every]'), pillsBox = box.querySelector('[data-bb-pills]'), pillsFor = null;
+    function renderPills(q) {
+      if (!every) return;
+      var arr = subs[q] || [];
+      if (pillsFor !== q) {
+        pillsFor = q;
+        pillsBox.innerHTML = arr.map(function (x, i) { return '<button type="button" class="ohs-bb__pill" role="radio" data-i="' + i + '">' + esc(x.n + ' ' + x.unit + (x.n > 1 ? 's' : '')) + '</button>'; }).join('');
+        all('.ohs-bb__pill', pillsBox).forEach(function (btn, i, btns) {
+          btn.addEventListener('click', function () { subSel[q] = i; sync(); });
+          btn.addEventListener('keydown', function (e) {
+            var st = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+            if (!st) return; e.preventDefault();
+            subSel[q] = (i + st + btns.length) % btns.length; sync(); btns[subSel[q]].focus();
+          });
+        });
+      }
+      all('.ohs-bb__pill', pillsBox).forEach(function (btn, i) { var on = i === subSel[q]; btn.setAttribute('aria-checked', on ? 'true' : 'false'); btn.tabIndex = on ? 0 : -1; });
+      every.hidden = !(arr.length > 1 && plan() === 'subscribe');
     }
 
     function sync() {
       var p = plan(), q = qty(), b = info(q);
+      list.forEach(function (x) { var c = curSub(x.qty); if (c) { price.subscribe[x.qty] = c.amt; x.period = c.label; } });
+      renderPills(q);
+      var k = pct(q), ptitle = box.querySelector('[data-bb-ptitle]'), psub = box.querySelector('[data-bb-psub]');
+      if (ptitle) ptitle.textContent = k ? 'Subscribe & Save' : 'Subscribe';
+      if (psub) psub.textContent = single ? (k ? 'Save ' + k + '% · ' : '') + 'ships every ' + b.period + ' · cancel anytime' : (k ? 'Extra ' + k + '% off' : 'Auto-ship · cancel anytime');
       // every bundle card follows the plan
       bundleOpts.forEach(function (o) {
         var n = parseInt(o.getAttribute('data-qty'), 10), bi = info(n);
@@ -291,7 +382,8 @@
         if (we) { we.textContent = w - a > 0.005 ? fmt(w) : ''; we.hidden = !(w - a > 0.005); }
       });
       var amount = price[p][q], was = unit * q, save = was - amount;
-      var href = checkoutUrl(base, p, q);
+      var pid = src ? (p === 'subscribe' ? (curSub(q) || {}).id : src[q].once.id) : null;
+      var href = checkoutUrl(base, p, q, pid);
       ctaPrice.textContent = fmt(amount);
       cta.href = href;
       var terms = box.querySelector('[data-bb-terms]');
@@ -302,7 +394,7 @@
       if (heroPrices.length) {
         var big = '<b>' + esc(fmt(amount)) + '</b>' + (was > amount ? '<s>' + esc(fmt(was)) + '</s>' : '');
         var dt = dealText(b, p);
-        var cap = single ? (p === 'subscribe' ? 'Subscribe &amp; Save ' + subPct + '% · ships every ' + esc(b.period) + ' · cancel anytime' : 'One-time purchase' + (oneNote ? ' · ' + esc(oneNote) : '')) :
+        var cap = single ? (p === 'subscribe' ? (k ? 'Subscribe &amp; Save ' + k + '%' : 'Subscribe') + ' · ships every ' + esc(b.period) + ' · cancel anytime' : 'One-time purchase' + (oneNote ? ' · ' + esc(oneNote) : '')) :
           q + (q > 1 ? ' bottles' : ' bottle') + (dt ? ' · ' + esc(dt) : '') +
           (p === 'subscribe' ? ' · ships every ' + esc(b.period) : ' · one-time purchase') +
           (q > 1 ? ' · ' + esc(fmt(amount / q)) + ' per bottle' : '');

@@ -381,7 +381,9 @@
     all('[data-ohs~="ftr"]').forEach(function (s) { s.setAttribute('role', 'contentinfo'); });
   }
 
-  /* 9 · Checkout page: honour ?plan=subscribe|once&bottles=1|3|5 from the lander's plan picker.
+  /* 9 · Checkout page: honour ?plan=subscribe|once&bottles=1|3|5[&price=<id>] from the lander's plan picker.
+         price (optional, sent by buybox.js in product mode) selects that exact price, e.g. one of
+         several subscription intervals; if the checkout doesn't offer it, the plan rule below applies.
          bottles picks the product card: the one whose name holds that number of bottles
          ("NanoBlue - 3 Bottles"); a name without a number counts as 1 bottle. With no match
          (or no bottles in the link) the selected card is kept. The card is clicked (ClickFunnels
@@ -403,6 +405,7 @@
     if (!root) return;
     var wantSub = plan === 'subscribe';
     var wantBottles = parseInt(q.get('bottles'), 10) || 0;   // 0 = keep the selected product
+    var wantPrice = q.get('price') || '';
     var userPicked = false;
     // capture phase: ClickFunnels stops the event on the dropdown itself
     root.addEventListener('change', function (e) {
@@ -447,7 +450,8 @@
       var s = card.querySelector('select[name="variant_price"]');
       if (!s) return;
       var want = null;
-      try {
+      if (wantPrice && Array.prototype.some.call(s.options, function (o) { return o.value === wantPrice; })) want = wantPrice;
+      if (want === null) try {
         var data = cardData(card);
         var v = data.variant || data.product.default_variant;
         v.prices.forEach(function (p) { if (want === null && !!p.is_recurring === wantSub) want = String(p.id); });
@@ -654,7 +658,7 @@
       return map;
     }
     function every(p, bottles) {
-      var m = /\/\s*(\d+)?\s*(day|week|month|year)s?/i.exec(p.name || '');
+      var m = /(?:\/|every)\s*(\d+)?\s*(day|week|month|year)s?/i.exec(p.name || '');   // "$72.00 / 3 months" or "Delivery Every 2 Month"
       var n = m ? +(m[1] || 1) : bottles, unit = m ? m[2].toLowerCase() : 'month';
       return n > 1 ? n + ' ' + unit + 's' : unit;
     }
