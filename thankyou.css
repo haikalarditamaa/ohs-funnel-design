@@ -1,0 +1,166 @@
+/* =====================================================================
+   OHS · NANOBLUE THANK-YOU PAGE · add-on to style.css  (ClickFunnels 2.0)
+   Load AFTER style.css. Only the parts the thank-you page adds:
+     ty-tick        Headline: green check circle above the H1
+     ty-pills       Bullet List: order number / date chips
+     ty-order       Column: the "Your order" card around ClickFunnels'
+                    Order Confirmation element
+     ty-order-title Paragraph: the card's sand header bar
+     ty-renew       Paragraph: green subscription strip at the bottom of the card
+     ty-steps       Bullet List: "What happens next" timeline
+     card-flat      Column (with card): outlined help card, round icon
+     ico-box / ico-autoship / ico-clock / ico-cal / ico-mail: extra icons
+   Same rules as style.css: never styles html, body, :root or *.
+   ===================================================================== */
+
+[data-ohs] {
+  --i-box: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 8l-9-5-9 5 9 5 9-5z'/%3E%3Cpath d='M3 8v8l9 5 9-5V8M12 13v8'/%3E%3C/svg%3E");
+  --i-autoship: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 00-14.3-4.9L4 8'/%3E%3Cpath d='M4 4v4h4M4 13a8 8 0 0014.3 4.9L20 16'/%3E%3Cpath d='M20 20v-4h-4'/%3E%3C/svg%3E");
+  --i-clock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 7.5V12l3 2'/%3E%3C/svg%3E");
+  --i-cal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15' rx='2'/%3E%3Cpath d='M3.5 10h17M8 3v4M16 3v4'/%3E%3C/svg%3E");
+  --i-mail: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='M3.5 6.5L12 13l8.5-6.5'/%3E%3C/svg%3E");
+  --i-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+/* Text is left-aligned on this page, phones included, except in rows tagged "center"
+   (ClickFunnels centres text by default). Cards are always left-aligned. */
+[data-ohs~="sec"] [data-ohs~="wrap"]:not([data-ohs~="center"]) :is(h1,h2,h3,h4,h5,h6,p),
+[data-ohs~="card"] :is(h1,h2,h3,h4,h5,h6,p) { text-align: left !important }
+
+[data-ohs~="ico-box"]      { --ico: var(--i-box) }
+[data-ohs~="ico-autoship"] { --ico: var(--i-autoship) }
+[data-ohs~="ico-clock"]    { --ico: var(--i-clock) }
+[data-ohs~="ico-cal"]      { --ico: var(--i-cal) }
+[data-ohs~="ico-mail"]     { --ico: var(--i-mail) }
+
+
+/* ---------- ty-tick (Headline): green check circle above the H1 ---------- */
+[data-ohs~="ty-tick"] { position: relative !important; padding-top: 92px !important }
+[data-ohs~="ty-tick"]::before {
+  content: ""; position: absolute; top: 0; left: 50%; width: 72px; height: 72px; margin-left: -36px;
+  border-radius: 50%; background: var(--ohs-green); box-shadow: 0 0 0 8px var(--ohs-green-50);
+}
+[data-ohs~="ty-tick"]::after {
+  content: ""; position: absolute; top: 18px; left: 50%; width: 36px; height: 36px; margin-left: -18px; background: #fff;
+  -webkit-mask: var(--i-tick) center / contain no-repeat; mask: var(--i-tick) center / contain no-repeat;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-ohs~="ty-tick"]::before { animation: ohs-ty-pop .5s cubic-bezier(.16,1,.3,1) both }
+  [data-ohs~="ty-tick"]::after  { animation: ohs-ty-wipe .45s .25s cubic-bezier(.16,1,.3,1) both }
+}
+@keyframes ohs-ty-pop  { from { transform: scale(.6); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes ohs-ty-wipe { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
+@media (max-width: 767px) {
+  [data-ohs~="ty-tick"] { padding-top: 76px !important }
+  [data-ohs~="ty-tick"]::before { width: 56px; height: 56px; margin-left: -28px }
+  [data-ohs~="ty-tick"]::after  { top: 14px; width: 28px; height: 28px; margin-left: -14px }
+}
+
+
+/* ---------- ty-pills (Bullet List): order chips under the intro ---------- */
+[data-ohs~="ty-pills"] { margin-top: 24px !important }
+[data-ohs~="ty-pills"] ul { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 !important; padding: 0 !important; list-style: none !important }
+[data-ohs~="ty-pills"] ul > span { display: contents !important }
+[data-ohs~="ty-pills"] li {
+  display: inline-flex !important; align-items: center; gap: 6px; margin: 0 !important; padding: 6px 14px !important;
+  border: 1px solid var(--ohs-line); border-radius: 999px; background: #fff;
+  font-size: 14px !important; line-height: 20px !important; color: var(--ohs-muted) !important;
+}
+[data-ohs~="ty-pills"] li::marker { content: "" }
+[data-ohs~="ty-pills"] li > :is(i,svg,img,.fa) { display: none !important }
+[data-ohs~="ty-pills"] li * { font-size: inherit !important; line-height: inherit !important; color: inherit !important; margin: 0 !important }
+[data-ohs~="ty-pills"] li :is(b,strong) { color: var(--ohs-ink) !important; font-weight: 600 !important }
+
+
+/* ---------- ty-order (Column): the "Your order" card ---------- */
+[data-ohs~="ty-order"] {
+  padding: 0 !important; border: 1px solid var(--ohs-line) !important; border-radius: var(--ohs-r-lg) !important;
+  background: #fff !important; box-shadow: var(--ohs-shadow-1) !important; overflow: hidden !important; align-self: flex-start;
+}
+[data-ohs~="ty-order"] { box-sizing: border-box !important }
+[data-ohs~="ty-order"] .col-inner { margin: 0 !important; padding: 0 !important }
+/* Desktop / tablet: card at 400px, timeline takes the rest, 48px apart, always side by side */
+[data-ohs~="wrap"]:has(> [data-ohs~="ty-order"])::before,
+[data-ohs~="wrap"]:has(> [data-ohs~="ty-order"])::after { display: none !important; content: none !important }
+@media (min-width: 768px) {
+  [data-ohs~="wrap"]:has(> [data-ohs~="ty-order"]) { flex-wrap: nowrap !important; gap: 48px !important; align-items: flex-start !important }
+  [data-ohs~="wrap"] > [data-ohs~="ty-order"] { flex: 0 0 400px !important; width: 400px !important; max-width: 45% !important; margin: 0 !important }
+  [data-ohs~="wrap"]:has(> [data-ohs~="ty-order"]) > :not([data-ohs~="ty-order"]) { flex: 1 1 0 !important; width: auto !important; max-width: none !important; min-width: 0; margin: 0 !important }
+  [data-ohs~="wrap"]:has(> [data-ohs~="ty-order"]) > :not([data-ohs~="ty-order"]) > .col-inner { margin: 0 !important }
+}
+@media (max-width: 767px) {
+  [data-ohs~="wrap"]:has(> [data-ohs~="ty-order"]) { gap: 48px !important }
+  [data-ohs~="wrap"]:has(> [data-ohs~="ty-order"]) > * { margin: 0 !important }
+}
+/* Title bar */
+[data-ohs~="ty-order-title"] { margin: 0 !important; padding: 16px 24px !important; background: var(--ohs-sand) !important; border-bottom: 1px solid var(--ohs-line) }
+[data-ohs~="ty-order-title"] p { font-size: 18px !important; line-height: 24px !important; font-weight: 700 !important; color: var(--ohs-ink) !important; text-align: left !important }
+/* ClickFunnels' Order Confirmation element (any element inside the card that isn't tagged).
+   First pass, written without the element's exact markup: check it on a sandbox order. */
+[data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) { margin: 0 !important; padding: 20px 24px !important; text-align: left !important }
+[data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) [data-page-element] { padding: 0 !important }
+[data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) * { font-family: var(--ohs-font) !important; text-align: left; color: var(--ohs-text) }
+[data-ohs~="ty-order"] table { width: 100% !important; border-collapse: collapse !important; border: 0 !important; background: none !important }
+[data-ohs~="ty-order"] :is(th,td) { padding: 8px 0 !important; border: 0 !important; border-bottom: 1px solid var(--ohs-line) !important; background: none !important; font-size: 14px !important; line-height: 20px !important; vertical-align: top }
+[data-ohs~="ty-order"] th { font-size: 12px !important; line-height: 16px !important; font-weight: 700 !important; letter-spacing: .08em; text-transform: uppercase; color: var(--ohs-muted) !important }
+[data-ohs~="ty-order"] :is(th,td):last-child { text-align: right !important; color: var(--ohs-ink) !important; font-weight: 600 }
+[data-ohs~="ty-order"] tr:last-child td { border-bottom: 0 !important; font-size: 18px !important; font-weight: 800 !important; color: var(--ohs-ink) !important; padding-top: 12px !important }
+[data-ohs~="ty-order"] img { width: 72px !important; height: 72px !important; object-fit: contain; border-radius: var(--ohs-r-md); background: var(--ohs-sand) }
+/* Subscription strip */
+[data-ohs~="ty-renew"] { margin: 0 !important; padding: 14px 24px 14px 54px !important; background: var(--ohs-green-50) !important; position: relative !important; border-top: 1px solid var(--ohs-line) }
+[data-ohs~="ty-renew"]::before {
+  content: ""; position: absolute; left: 24px; top: 14px; width: 20px; height: 20px; background: var(--ohs-green-700);
+  -webkit-mask: var(--i-autoship) center / contain no-repeat; mask: var(--i-autoship) center / contain no-repeat;
+}
+[data-ohs~="ty-renew"] p { font-size: 14px !important; line-height: 20px !important; color: var(--ohs-green-700) !important; text-align: left !important }
+@media (max-width: 767px) {
+  [data-ohs~="ty-order-title"], [data-ohs~="ty-order"] [data-page-element]:not([data-ohs]) { padding-left: 20px !important; padding-right: 20px !important }
+  [data-ohs~="ty-renew"] { padding-left: 50px !important; padding-right: 20px !important }
+  [data-ohs~="ty-renew"]::before { left: 20px }
+}
+
+
+/* ---------- ty-steps (Bullet List): timeline ----------
+   Each bullet:  *When* **Title** Text   (italic = small green label, bold = title)
+   The 1st step shows as done (filled), the 2nd as in progress (outlined). */
+[data-ohs~="ty-steps"] { margin-top: 24px !important }
+[data-ohs~="ty-steps"] ul { display: grid !important; gap: 0; margin: 0 !important; padding: 0 !important; list-style: none !important }
+[data-ohs~="ty-steps"] ul > span { display: contents !important }
+[data-ohs~="ty-steps"] li {
+  position: relative !important; margin: 0 !important; padding: 0 0 28px 64px !important; min-height: 48px;
+  font-size: 16px !important; line-height: 24px !important; color: var(--ohs-text) !important; text-align: left !important;
+  background: linear-gradient(var(--ohs-line), var(--ohs-line)) 23px 52px / 2px calc(100% - 56px) no-repeat !important;
+}
+[data-ohs~="ty-steps"] li:first-child { background-image: linear-gradient(var(--ohs-green), var(--ohs-green)) !important }
+[data-ohs~="ty-steps"] li:last-child { padding-bottom: 0 !important; background: none !important }
+[data-ohs~="ty-steps"] li::marker { content: "" }
+[data-ohs~="ty-steps"] li > :is(i,svg,img,.fa) { display: none !important }
+[data-ohs~="ty-steps"] li * { margin: 0 !important; font-size: inherit !important; line-height: inherit !important; color: inherit !important }
+[data-ohs~="ty-steps"] li::before { content: ""; position: absolute; left: 0; top: 0; width: 48px; height: 48px; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--ohs-line); background: #fff }
+[data-ohs~="ty-steps"] li::after {
+  content: ""; position: absolute; left: 13px; top: 13px; width: 22px; height: 22px; background: var(--ohs-muted);
+  -webkit-mask: var(--step, var(--i-check)) center / contain no-repeat; mask: var(--step, var(--i-check)) center / contain no-repeat;
+}
+[data-ohs~="ty-steps"] li:nth-child(1) { --step: var(--i-check) }
+[data-ohs~="ty-steps"] li:nth-child(2) { --step: var(--i-box) }
+[data-ohs~="ty-steps"] li:nth-child(3) { --step: var(--i-truck) }
+[data-ohs~="ty-steps"] li:nth-child(4) { --step: var(--i-autoship) }
+[data-ohs~="ty-steps"] li:nth-child(1)::before { background: var(--ohs-green); border-color: var(--ohs-green) }
+[data-ohs~="ty-steps"] li:nth-child(1)::after { background: #fff }
+[data-ohs~="ty-steps"] li:nth-child(2)::before { background: var(--ohs-green-50); border-color: var(--ohs-green) }
+[data-ohs~="ty-steps"] li:nth-child(2)::after { background: var(--ohs-green) }
+[data-ohs~="ty-steps"] li :is(em,i:not(.fa)) {
+  display: block; margin-top: 2px !important; font-style: normal !important; font-size: 12px !important; line-height: 16px !important;
+  font-weight: 700 !important; letter-spacing: .12em; text-transform: uppercase; color: var(--ohs-muted) !important;
+}
+[data-ohs~="ty-steps"] li:nth-child(-n+2) :is(em,i:not(.fa)) { color: var(--ohs-green-700) !important }
+[data-ohs~="ty-steps"] li :is(b,strong) { display: block; margin-top: 4px !important; font-size: 18px !important; line-height: 26px !important; font-weight: 700 !important; color: var(--ohs-ink) !important }
+@media (max-width: 767px) { [data-ohs~="ty-steps"] li { padding-left: 60px !important } }
+
+
+/* ---------- card-flat (Column, together with card): outlined help card ---------- */
+[data-ohs~="card-flat"] { padding: 80px 24px 24px !important; border: 1px solid var(--ohs-line) !important; box-shadow: none !important; display: flex !important; flex-direction: column }
+[data-ohs~="card-flat"]:hover { transform: none; box-shadow: none !important }
+[data-ohs~="card-flat"]::before { width: 40px; height: 40px; border-radius: 50%; background: var(--ohs-green-50) }
+[data-ohs~="card-flat"]::after { left: 33px; top: 33px; width: 22px; height: 22px; background: var(--ohs-green) }
+[data-ohs~="card-flat"] .col-inner { display: flex; flex-direction: column; height: 100% }
+[data-ohs~="card-flat"] [data-ohs~="btn"] { margin-top: auto !important; padding-top: 20px !important }
