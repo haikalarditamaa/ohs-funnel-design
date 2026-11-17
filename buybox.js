@@ -29,6 +29,9 @@
    Every 1 / 2 / 3 Month") add a "Deliver every" choice. Savings, struck prices and "Subscribe & Save"
    wording only show when the subscription really costs less. Add to cart also passes &price=<id>
    so the checkout selects that exact price (footer.js). data-unit still overrides the regular price.
+   Products may be subscription-only (no one-time price): the Subscribe / One-time toggle then disappears
+   and the bundle cards show the subscription prices. The regular price (struck through) is then the
+   1-bottle subscription price unless data-unit is set.
 
    "Add to cart" opens  <checkout>?plan=subscribe|once&bottles=1|3|5  (+ utm_* / ad click ids).
    footer.js on the checkout selects the product whose name holds that bottle count
@@ -209,7 +212,7 @@
         else { var iv = intervalOf(pr.name); e.subs.push({ id: pr.id, amt: amt, n: iv.n, unit: iv.unit, days: iv.days, label: iv.label }); }
       });
       e.subs.sort(function (a, b) { return a.days - b.days; });
-      if (e.once) { out[q] = e; any = true; }
+      if (e.once || e.subs.length) { out[q] = e; any = true; }   // subscription-only products count too
     });
     return any ? out : null;
   }
@@ -223,24 +226,32 @@
     if (src) {
       Object.keys(src).forEach(function (k) {
         var q = parseInt(k, 10);
-        price.once[q] = src[q].once.amt;
+        if (src[q].once) price.once[q] = src[q].once.amt;
         if (src[q].subs.length) { subs[q] = src[q].subs; subSel[q] = 0; price.subscribe[q] = subs[q][0].amt; }
       });
     } else {
       price.once = parsePrices(slot.getAttribute('data-prices') || '1|40;3|80;5|120');
       price.subscribe = parsePrices(slot.getAttribute('data-sub-prices') || '1|36;3|72;5|108');
     }
-    var unit = parseFloat(slot.getAttribute('data-unit')) || price.once[1] || 40;
+    var unit = parseFloat(slot.getAttribute('data-unit')) || price.once[1] || price.subscribe[1] || 40;
     var known = BUNDLES.map(function (b) { return b.qty; });
     var list = BUNDLES.map(function (b) { return { qty: b.qty, title: b.title, deal: b.deal, period: b.period, ribbon: b.ribbon, gold: b.gold }; })
-      .concat(Object.keys(price.once).map(Number).filter(function (q) { return known.indexOf(q) < 0; }).sort(function (a, b) { return a - b; })
+      .concat(Object.keys(price.once).concat(Object.keys(price.subscribe)).map(Number)
+        .filter(function (q, i, a) { return known.indexOf(q) < 0 && a.indexOf(q) === i; }).sort(function (a, b) { return a - b; })
         .map(function (q) { return { qty: q, title: 'Buy ' + q, deal: '', period: q + ' months' }; }))
-      .filter(function (b) { return price.once[b.qty] != null; })
+      .filter(function (b) { return price.once[b.qty] != null || price.subscribe[b.qty] != null; })
       .sort(function (a, b) { return a.qty - b.qty; });
     if (!list.length) return;
     var hasSub = list.every(function (b) { return price.subscribe[b.qty] != null; });
+    var hasOnce = list.every(function (b) { return price.once[b.qty] != null; });
+    if (!hasSub && !hasOnce) {   // mixed: keep the bundles that have a subscription (or, failing that, a one-time) price
+      var anySub = list.some(function (b) { return price.subscribe[b.qty] != null; });
+      list = list.filter(function (b) { return anySub ? price.subscribe[b.qty] != null : price.once[b.qty] != null; });
+      hasSub = anySub; hasOnce = !anySub;
+    }
+    var both = hasSub && hasOnce;   // Subscribe / One-time toggle only when every bundle has both
     var defQty = parseInt(slot.getAttribute('data-default'), 10) || 3;
-    var defPlan = hasSub && (slot.getAttribute('data-plan') || 'subscribe') !== 'once' ? 'subscribe' : 'once';
+    var defPlan = both ? ((slot.getAttribute('data-plan') || 'subscribe') !== 'once' ? 'subscribe' : 'once') : (hasSub ? 'subscribe' : 'once');
     function curSub(q) { return subs[q] ? subs[q][subSel[q]] : null; }
     function pct(q) { return hasSub && price.once[q] ? Math.max(0, Math.round((1 - price.subscribe[q] / price.once[q]) * 100)) : 0; }
     var uid = 'ohs-bb' + index;
@@ -249,17 +260,19 @@
     var oneNoteAttr = slot.getAttribute('data-one-note');
     var oneNote = oneNoteAttr == null ? '1 bottle · 30 servings' : oneNoteAttr;
 
-    var single = list.length === 1 && hasSub;
+    var single = list.length === 1 && both;
     var pp = single ? function (pl) { return '<span class="ohs-bb__prices"><span class="ohs-bb__price" data-bb-pprice="' + pl + '"></span><s data-bb-pwas="' + pl + '"></s></span>'; } : function () { return ''; };
     var html = '<div class="ohs ohs-bb' + (single ? ' ohs-bb--single' : '') + '" data-ohs-bb>' +
       '<div class="ohs-bb__head"><span class="ohs-bb__label" id="' + uid + '-h">' + (single ? 'Choose how you buy' : 'Choose your bundle') + '</span><span class="ohs-bb__badge" data-bb-saved hidden></span></div>';
-    if (hasSub) {
+    if (both) {
       html += '<div class="ohs-bb__plans" role="radiogroup" aria-label="Purchase type">' +
         '<div class="ohs-bb__opt" role="radio" data-plan="subscribe"><span class="ohs-bb__radio" aria-hidden="true"></span>' +
           '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle" data-bb-ptitle>Subscribe &amp; Save</span><span class="ohs-bb__psub" data-bb-psub></span></span>' + pp('subscribe') + '</div>' +
         '<div class="ohs-bb__opt" role="radio" data-plan="once"><span class="ohs-bb__radio" aria-hidden="true"></span>' +
           '<span class="ohs-bb__ptext"><span class="ohs-bb__ptitle">One-time</span><span class="ohs-bb__psub">' + (single ? 'Single order · HSA/FSA via TrueMed' : 'HSA/FSA via TrueMed') + '</span></span>' + pp('once') + '</div>' +
       '</div>';
+    }
+    if (hasSub) {
       html += '<div class="ohs-bb__every" data-bb-every hidden><span class="ohs-bb__every-label" id="' + uid + '-e">Deliver every</span><div class="ohs-bb__pills" role="radiogroup" aria-labelledby="' + uid + '-e" data-bb-pills></div></div>';
     }
     html += '<div class="ohs-bb__bundles" role="radiogroup" aria-labelledby="' + uid + '-h"' + (single ? ' hidden' : '') + '>';
@@ -317,7 +330,7 @@
       }
     }
 
-    function plan() { var o = box.querySelector('.ohs-bb__plans .is-selected'); return o ? o.getAttribute('data-plan') : 'once'; }
+    function plan() { var o = box.querySelector('.ohs-bb__plans .is-selected'); return o ? o.getAttribute('data-plan') : defPlan; }
     function qty() { var o = box.querySelector('.ohs-bb__bundles .is-selected'); return parseInt(o.getAttribute('data-qty'), 10); }
     function info(q) { return list.filter(function (x) { return x.qty === q; })[0]; }
     function dealText(b, p) {
